@@ -2,13 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-}
+:root {}
 
 @media (prefers-color-scheme: dark) {
-  :root {
-  }
+  :root {}
 }
 
-body {
+body {}
+
+@layer base {
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }

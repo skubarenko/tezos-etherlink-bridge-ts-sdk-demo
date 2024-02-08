@@ -1,3 +1,3 @@
 export const config = {
-    appName: 'Tez2Eth Bridge'
-} as const
+    appName: 'Tez2Eth'
+} as const;
