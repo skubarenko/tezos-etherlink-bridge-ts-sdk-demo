@@ -1,5 +1,11 @@
 export const config = {
-    isTestnet: true,
-    appName: 'Tez2Eth',
-    bridgeSmartRollupNodeBaseUrl: 'https://etherlink-rollup-nairobi.dipdup.net'
+  appName: 'Tez2Eth',
+  isTestnet: true,
+  tezos: {
+    networkName: 'Nairobinet'
+  },
+  etherlink: {
+    networkName: 'Etherlink Testnet'
+  },
+  bridgeSmartRollupNodeBaseUrl: 'https://etherlink-rollup-nairobi.dipdup.net'
 } as const;

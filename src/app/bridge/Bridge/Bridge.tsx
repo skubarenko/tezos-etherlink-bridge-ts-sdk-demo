@@ -8,7 +8,7 @@ import { TransferToPure } from './TransferTo';
 import { config } from '@/config';
 import type { Token, TokenPair } from '@/models';
 import { nativeEtherlinkToken, nativeTezosToken } from '@/tokens';
-import { tokenUtils } from '@/utils';
+import { emptyFunction, tokenUtils } from '@/utils';
 
 type TransferCallback = (amount: bigint, token: Token, receiverAddress?: string) => Promise<void>;
 
@@ -96,6 +96,7 @@ export const Bridge = (props: BridgeProps) => {
     () => {
       setIsTokenTransferring(true);
       handleTransferButtonClick(currentToken, currentTokenAmount, onDeposit)
+        .catch(emptyFunction)
         .finally(() => setIsTokenTransferring(false));
     },
     [currentToken, currentTokenAmount, onDeposit]
@@ -104,6 +105,7 @@ export const Bridge = (props: BridgeProps) => {
     () => {
       setIsTokenTransferring(true);
       handleTransferButtonClick(currentToken, currentTokenAmount, onWithdraw)
+        .catch(emptyFunction)
         .finally(() => setIsTokenTransferring(false));
     },
     [currentToken, currentTokenAmount, onWithdraw]

@@ -3,11 +3,12 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import { ProgressPure, ProgressSegment } from './Progress';
 import { RollupDataLink, type RollupData } from './RollupDataLink';
 import { TransferError } from './TransferError';
-import { ExplorerLinkPure, LinkType } from '../ExplorerLink';
+import { ExplorerLinkPure } from '../ExplorerLink';
 import { TokenPure } from '../Token';
 import { SpinIcon } from '../icons';
 import type { Token } from '@/models';
-import { tokenUtils } from '@/utils';
+import { emptyFunction, tokenUtils } from '@/utils';
+import { LinkType } from '@/utils/blockchainUtils';
 
 export const enum TransferStatus {
   Pending = 0,
@@ -99,7 +100,9 @@ export const Transfer = (props: TransferProps) => {
   const handleFinishWithdrawing = useCallback(
     () => {
       setIsLoading(true);
-      onFinishWithdrawing().finally(() => setIsLoading(false));
+      onFinishWithdrawing()
+        .catch(emptyFunction)
+        .finally(() => setIsLoading(false));
     },
     [onFinishWithdrawing]
   );

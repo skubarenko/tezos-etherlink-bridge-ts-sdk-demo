@@ -12,10 +12,9 @@ import {
 } from '@/lib/bridgeOperations';
 import type { Token } from '@/models';
 import { tokenPairs } from '@/tokens';
-import { getErrorMessage } from '@/utils';
+import { getErrorMessage, wait } from '@/utils';
 
 const emptyBalancesMap = new Map<Token, string>();
-const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
 export default function Bridge() {
   const [tokenBalances, setTokenBalances] = useState<ReadonlyMap<Token, string>>(emptyBalancesMap);
