@@ -121,8 +121,8 @@ export const Bridge = (props: BridgeProps) => {
   >
     <h2 className="text-2xl font-medium dark:text-gray-100">
       Bridge
-      {config.isTestnet && <span className="ml-2 px-3 py-1 rounded-xl text-lg dark:text-orange-100 dark:bg-orange-700">
-        <ExclamationTriangleIcon className="inline h-6 w-6 -mt-1" />
+      {config.isTestnet && <span className="ml-3 px-3 py-1 rounded-xl text-lg dark:text-orange-100 dark:bg-orange-700">
+        <ExclamationTriangleIcon className="inline h-6 w-6 -mt-1 -ml-1 mr-1" />
         Testnet
       </span>}
     </h2>
