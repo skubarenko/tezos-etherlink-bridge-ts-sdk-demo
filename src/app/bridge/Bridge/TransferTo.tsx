@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
-import { TokenPure } from './Token';
 import { TransferPure } from './Transfer';
+import { TokenPure } from '@/components/Token';
 import { Token } from '@/models';
 
 interface TransferToProps {

@@ -16,7 +16,7 @@ interface TransferFromProps {
 }
 
 export const TransferFrom = (props: TransferFromProps) => {
-  const [inputTokensAmount, setInputTokensAmount] = useState<string>('0');
+  const [inputTokensAmount, setInputTokensAmount] = useState<string>('');
   const currentTokenDecimals = props.currentToken ? props.currentToken.decimals : 0;
   const currentTokenBalance = (props.currentToken && props.tokenBalances.get(props.currentToken)) || '0';
   const onAmountChanged = props.onAmountChanged;
@@ -24,7 +24,9 @@ export const TransferFrom = (props: TransferFromProps) => {
   const handleTokensAmountChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     e => {
       try {
-        const preparedValue = tokenUtils.truncateTokensAmountToDecimals(e.target.value, currentTokenDecimals);
+        const preparedValue = e.target.value !== '0'
+          ? tokenUtils.truncateTokensAmountToDecimals(e.target.value, currentTokenDecimals)
+          : '';
 
         setInputTokensAmount(preparedValue);
         onAmountChanged(preparedValue);

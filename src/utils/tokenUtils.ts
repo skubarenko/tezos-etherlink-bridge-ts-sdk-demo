@@ -38,3 +38,34 @@ export const convertTokensAmountToRawAmount = (amount: string, decimals: number)
     return null;
   }
 };
+
+export const convertTokensRawAmountToAmount = (amount: bigint, decimals: number): string => {
+  const amountString = amount.toString(10);
+  if (!decimals)
+    return amountString;
+
+  const integerPartLength = amountString.length - decimals;
+  const amountWithDecimals = integerPartLength > 0
+    ? amountString.substring(0, integerPartLength) + '.' + amountString.substring(integerPartLength)
+    : '0.' + amountString;
+
+  let excessTrailingZeroIndex = -1;
+  for (let i = amountWithDecimals.length - 1; i >= 0; i--) {
+    const character = amountWithDecimals[i];
+
+    if (character === '.' || character === ',') {
+      excessTrailingZeroIndex = i - 1;
+      break;
+    }
+    else if (character !== '0') {
+      excessTrailingZeroIndex = i;
+      break;
+    }
+  }
+
+  const result = excessTrailingZeroIndex > -1
+    ? amountWithDecimals.substring(0, excessTrailingZeroIndex + 1)
+    : amountWithDecimals;
+
+  return result;
+};

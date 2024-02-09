@@ -16,12 +16,12 @@ export const enum TransferButtonDisallowedState {
   UnknownError = 100
 }
 
-const enabledButtonClassName = 'cursor-pointer dark:text-white dark:bg-blue-700 dark:hover:bg-blue-800';
-const disabledButtonClassName = 'dark:text-white disabled:dark:bg-blue-700 opacity-70';
-const errorButtonClassName = 'dark:text-white disabled:dark:bg-red-700 opacity-70';
+const enabledButtonClassName = 'cursor-pointer dark:text-gray-100 dark:bg-blue-700 dark:hover:bg-blue-800';
+const disabledButtonClassName = 'dark:text-gray-100 disabled:dark:bg-blue-700 opacity-70';
+const errorButtonClassName = 'dark:text-gray-100 disabled:dark:bg-red-700 opacity-70';
 
 const classNameByDisallowedState = {
-  [TransferButtonDisallowedState.None]: 'dark:text-white dark:bg-blue-700 dark:hover:bg-blue-800',
+  [TransferButtonDisallowedState.None]: enabledButtonClassName,
   [TransferButtonDisallowedState.Loading]: disabledButtonClassName,
   [TransferButtonDisallowedState.TokenTransferring]: disabledButtonClassName,
   [TransferButtonDisallowedState.TezosAccountNotConnected]: enabledButtonClassName,

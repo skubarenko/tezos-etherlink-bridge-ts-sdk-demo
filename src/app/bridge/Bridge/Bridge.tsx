@@ -11,7 +11,7 @@ import { tokenUtils } from '@/utils';
 type TransferCallback = (amount: bigint, token: Token, receiverAddress?: string) => Promise<void>;
 
 const handleTransferButtonClick = (currentToken: Token | null, currentTokenAmount: string, callback: TransferCallback): Promise<void> => {
-  if (!currentToken)
+  if (!currentToken || currentTokenAmount.startsWith('-'))
     return Promise.resolve();
 
   const currentTokenRawAmount = tokenUtils.convertTokensAmountToRawAmount(currentTokenAmount, currentToken.decimals);
@@ -115,9 +115,9 @@ export const Bridge = (props: BridgeProps) => {
     [targetToken]
   );
 
-  return <div className="flex flex-col w-full max-w-xl p-4 rounded-xl overflow-hidden dark:bg-slate-800"
+  return <div className="flex flex-col w-full max-w-xl m-4 p-4 rounded-xl overflow-hidden dark:bg-slate-800"
   >
-    <h2 className="mb-4 text-2xl font-medium dark:text-white">Bridge</h2>
+    <h2 className="mb-4 text-2xl font-medium dark:text-gray-100">Bridge</h2>
     <TransferFromPure
       isTezos={isDeposit}
       currentToken={currentToken}
@@ -128,7 +128,7 @@ export const Bridge = (props: BridgeProps) => {
     />
     <button className="flex self-center items-center justify-center
       w-12 h-12 rounded-lg
-      dark:text-white dark:bg-slate-600 dark:hover:bg-slate-700"
+      dark:text-gray-100 dark:bg-slate-600 dark:hover:bg-slate-700"
       onClick={handleSwitchDirection}
     >
       <ArrowsUpDownIcon className="h-7 w-7" />

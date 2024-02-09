@@ -2,7 +2,7 @@ import { Listbox, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { Fragment, memo } from 'react';
 
-import { TokenPure } from './Token';
+import { TokenPure } from '@/components/Token';
 import type { Token } from '@/models';
 
 interface TokensListItemProps {
@@ -33,7 +33,7 @@ interface TokensListProps {
 
 const EmptyTokensList = () => {
   return <div className="flex w-full items-center px-4 py-2.5
-    font-medium rounded-lg text-white bg-slate-700
+    font-medium rounded-lg text-gray-100 bg-slate-700
     hover:cursor-not-allowed hover:bg-slate-800
     dark:bg-slate-700 dark:hover:bg-slate-800"
   >
@@ -47,7 +47,7 @@ export const TokensList = (props: TokensListProps) => {
     ? <Listbox as="div" value={props.currentToken} onChange={props.onTokenSelected} className="relative inline-block text-left">
       <Listbox.Button className="inline-flex justify-center items-center pl-2 pr-4 py-2
         font-medium rounded-lg
-        dark:text-white dark:bg-slate-700 dark:hover:bg-slate-800"
+        dark:text-gray-100 dark:bg-slate-700 dark:hover:bg-slate-800"
       >
         <TokenPure className="max-w-44 pl-2" token={props.currentToken} />
         <ChevronDownIcon className="h-5 w-5 ml-2 -mr-1" aria-hidden="true" />

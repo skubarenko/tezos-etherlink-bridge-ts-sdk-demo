@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import { BlockchainPure } from './Blockchain';
+import { BlockchainPure } from '@/components/Blockchain';
 
 interface TransferProps {
   title: string;

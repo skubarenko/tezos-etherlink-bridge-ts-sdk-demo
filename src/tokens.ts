@@ -1,9 +1,9 @@
 import type {
   NativeTezosToken, NativeEtherlinkToken,
   FA12TezosToken, FA2TezosToken, ERC20EtherlinkToken,
-  TokenPair
+  TokenPair,
+  Token
 } from './models';
-
 import ctezLogo from '@/public/icons/tokens/ctez.png';
 import fxhashLogo from '@/public/icons/tokens/fxhash.png';
 import xtzLogo from '@/public/icons/tokens/xtz.png';
@@ -93,3 +93,81 @@ export const tokenPairInfos = [
 
 export const tokenPairs: readonly TokenPair[] = tokenPairInfos
   .map(({ tezos, etherlink }) => ({ tezos: tezos.token, etherlink: etherlink.token }));
+
+interface TokenInfo {
+  type: Token['type'];
+  address?: string;
+  tokenId?: string;
+}
+
+type TokenByTokenInfoMap = {
+  native?: {
+    tezos?: NativeTezosToken,
+    etherlink?: NativeEtherlinkToken
+  },
+  'fa1.2'?: {
+    [address: string]: FA12TezosToken;
+  }
+  erc20?: {
+    [address: string]: ERC20EtherlinkToken;
+  }
+  fa2?: {
+    [address: string]: {
+      [tokenId: string]: FA2TezosToken;
+    }
+  }
+};
+
+const tokenByTokenInfoMap: TokenByTokenInfoMap = {};
+
+for (const tokenPairInfo of tokenPairInfos) {
+  // Tezos Part
+  if (tokenPairInfo.tezos.token.type === 'native') {
+    if (!tokenByTokenInfoMap.native)
+      tokenByTokenInfoMap.native = {};
+    tokenByTokenInfoMap.native.tezos = tokenPairInfo.tezos.token;
+  }
+  else {
+    if (!tokenByTokenInfoMap[tokenPairInfo.tezos.token.type])
+      tokenByTokenInfoMap[tokenPairInfo.tezos.token.type] = {};
+
+    if (tokenPairInfo.tezos.token.type === 'fa1.2') {
+      tokenByTokenInfoMap[tokenPairInfo.tezos.token.type]![tokenPairInfo.tezos.token.address] = tokenPairInfo.tezos.token;
+    }
+    else {
+      if (!tokenByTokenInfoMap[tokenPairInfo.tezos.token.type]![tokenPairInfo.tezos.token.address])
+        tokenByTokenInfoMap[tokenPairInfo.tezos.token.type]![tokenPairInfo.tezos.token.address] = {};
+
+      tokenByTokenInfoMap[tokenPairInfo.tezos.token.type]![tokenPairInfo.tezos.token.address]![tokenPairInfo.tezos.token.tokenId] = tokenPairInfo.tezos.token;
+    }
+  }
+
+  // Etherlink
+  if (tokenPairInfo.etherlink.token.type === 'native') {
+    if (!tokenByTokenInfoMap.native)
+      tokenByTokenInfoMap.native = {};
+    tokenByTokenInfoMap.native.etherlink = tokenPairInfo.etherlink.token;
+  }
+  else {
+    if (!tokenByTokenInfoMap[tokenPairInfo.etherlink.token.type])
+      tokenByTokenInfoMap[tokenPairInfo.etherlink.token.type] = {};
+
+    if (tokenPairInfo.etherlink.token.type === 'erc20') {
+      tokenByTokenInfoMap[tokenPairInfo.etherlink.token.type]![tokenPairInfo.etherlink.token.address] = tokenPairInfo.etherlink.token;
+    }
+  }
+}
+
+export const findTokenByInfo = (tokenInfo: TokenInfo, isTezos?: boolean): Token | undefined => {
+  const token = tokenInfo.type === 'native'
+    ? (isTezos ? tokenByTokenInfoMap[tokenInfo.type]?.tezos : tokenByTokenInfoMap[tokenInfo.type]?.etherlink)
+    : tokenInfo.address
+      ? tokenInfo.type === 'fa1.2' || tokenInfo.type === 'erc20'
+        ? tokenByTokenInfoMap[tokenInfo.type]?.[tokenInfo.address]
+        : tokenInfo.type === 'fa2' && tokenInfo.tokenId
+          ? tokenByTokenInfoMap[tokenInfo.type]?.[tokenInfo.address]?.[tokenInfo.tokenId]
+          : undefined
+      : undefined;
+
+  return token;
+};
