@@ -24,8 +24,8 @@ const classNameByDisallowedState = {
   [TransferButtonDisallowedState.None]: enabledButtonClassName,
   [TransferButtonDisallowedState.Loading]: disabledButtonClassName,
   [TransferButtonDisallowedState.TokenTransferring]: disabledButtonClassName,
-  [TransferButtonDisallowedState.TezosAccountNotConnected]: enabledButtonClassName,
-  [TransferButtonDisallowedState.EtherlinkAccountNotConnected]: enabledButtonClassName,
+  [TransferButtonDisallowedState.TezosAccountNotConnected]: disabledButtonClassName,
+  [TransferButtonDisallowedState.EtherlinkAccountNotConnected]: disabledButtonClassName,
   [TransferButtonDisallowedState.ZeroAmount]: disabledButtonClassName,
   [TransferButtonDisallowedState.NoTokens]: disabledButtonClassName,
   [TransferButtonDisallowedState.ZeroTokenBalance]: errorButtonClassName,
@@ -49,9 +49,9 @@ const getButtonText = (disallowedState: TransferButtonDisallowedState, isDeposit
     case TransferButtonDisallowedState.TokenTransferring:
       return 'Transferring...';
     case TransferButtonDisallowedState.TezosAccountNotConnected:
-      return 'Connect Tezos account';
+      return 'Please connect Tezos account';
     case TransferButtonDisallowedState.EtherlinkAccountNotConnected:
-      return 'Connect Etherlink account';
+      return 'Please connect Etherlink account';
     case TransferButtonDisallowedState.ZeroAmount:
       return 'Enter amount';
     case TransferButtonDisallowedState.NoTokens:

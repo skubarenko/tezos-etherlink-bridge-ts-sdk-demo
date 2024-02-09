@@ -1,8 +1,7 @@
-import { ArrowUpRightIcon } from '@heroicons/react/24/outline';
 import React from 'react';
 
 import { ExternalLink } from './ExternalLink';
-import { combineClassNames } from '@/utils';
+import { textUtils } from '@/utils';
 
 export const enum LinkType {
   Address = 0,
@@ -35,16 +34,11 @@ const getUrl = (value: string, type: LinkType, explorer?: ExplorerType): string 
       return `https://blockscout.dipdup.net/${type === LinkType.Address ? 'address' : 'tx'}/${value}`;
   }
 };
-
-const getShortValue = (value: string): string => {
-  return `${value.substring(0, 6)}..${value.substring(value.length - 5)}`;
-};
-
 export const ExplorerLink = (props: ExplorerLinkProps) => {
   const displayShort = props.displayShort ?? true;
 
   return <ExternalLink href={getUrl(props.value, props.type, props.explorer)} className="font-mono">
-    <span>{displayShort ? getShortValue(props.value) : props.value}</span>
+    <span>{displayShort ? textUtils.getShortText(props.value, 6, 4) : props.value}</span>
   </ExternalLink>;
 };
 

@@ -24,3 +24,7 @@ export const padStart = (string: string, maxLength: number, fillString = ' ') =>
 export const padEnd = (string: string, maxLength: number, fillString = ' ') => String.prototype.padEnd !== undefined
   ? string.padEnd(maxLength, fillString)
   : stringPad(string, false, maxLength, fillString);
+
+export const getShortText = (value: string, firstPart: number, secondPart = firstPart): string => {
+  return `${value.substring(0, firstPart)}..${value.substring(value.length - secondPart)}`;
+};
