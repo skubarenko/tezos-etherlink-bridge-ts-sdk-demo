@@ -6,7 +6,7 @@ import { TransferButtonDisallowedState, TransferButtonPure } from './TransferBut
 import { TransferFromPure } from './TransferFrom';
 import { TransferToPure } from './TransferTo';
 import { config } from '@/config';
-import type { Token, TokenPair } from '@/models';
+import { EtherlinkAccountConnectionStatus, TezosAccountConnectionStatus, type Token, type TokenPair } from '@/models';
 import { nativeEtherlinkToken, nativeTezosToken } from '@/tokens';
 import { emptyFunction, tokenUtils } from '@/utils';
 
@@ -25,8 +25,8 @@ const handleTransferButtonClick = (currentToken: Token | null, currentTokenAmoun
 
 interface BridgeProps {
   isLoading: boolean;
-  isTezosAccountConnected: boolean;
-  isEtherlinkAccountConnected: boolean;
+  tezosAccountConnectionStatus: TezosAccountConnectionStatus;
+  etherlinkAccountConnectionStatus: EtherlinkAccountConnectionStatus;
   tokenPairs: readonly TokenPair[];
   tokenBalances: ReadonlyMap<Token, string>;
 
@@ -59,10 +59,14 @@ export const Bridge = (props: BridgeProps) => {
         setTransferButtonDisallowedState(TransferButtonDisallowedState.Loading);
       if (isTokenTransferring)
         setTransferButtonDisallowedState(TransferButtonDisallowedState.TokenTransferring);
-      else if (!props.isEtherlinkAccountConnected)
-        setTransferButtonDisallowedState(TransferButtonDisallowedState.EtherlinkAccountNotConnected);
-      else if (!props.isTezosAccountConnected)
+      else if (props.tezosAccountConnectionStatus === TezosAccountConnectionStatus.NotConnected)
         setTransferButtonDisallowedState(TransferButtonDisallowedState.TezosAccountNotConnected);
+      else if (props.etherlinkAccountConnectionStatus === EtherlinkAccountConnectionStatus.NotInstalled)
+        setTransferButtonDisallowedState(TransferButtonDisallowedState.EtherlinkWalletNotInstalled);
+      else if (props.etherlinkAccountConnectionStatus === EtherlinkAccountConnectionStatus.NotConnected)
+        setTransferButtonDisallowedState(TransferButtonDisallowedState.EtherlinkAccountNotConnected);
+      else if (props.etherlinkAccountConnectionStatus === EtherlinkAccountConnectionStatus.SwitchNetwork)
+        setTransferButtonDisallowedState(TransferButtonDisallowedState.EtherlinkAccountInvalidNetwork);
       else if (!currentToken)
         setTransferButtonDisallowedState(TransferButtonDisallowedState.NoTokens);
       else {
@@ -86,7 +90,7 @@ export const Bridge = (props: BridgeProps) => {
     },
     [
       currentToken, currentTokenAmount, isDeposit, isTokenTransferring,
-      props.isEtherlinkAccountConnected, props.isLoading, props.isTezosAccountConnected, props.tokenBalances
+      props.etherlinkAccountConnectionStatus, props.isLoading, props.tezosAccountConnectionStatus, props.tokenBalances
     ]
   );
 

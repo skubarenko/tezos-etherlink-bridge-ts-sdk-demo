@@ -9,8 +9,9 @@ import {
   DisconnectMenuItem
 } from './Common';
 import { EtherlinkConnectButton } from './ConnectButtons';
+import { useEtherlinkAccount } from '@/hooks';
 import { EtherlinkAccountConnectionStatus } from '@/models';
-import { emptyFunction, wait } from '@/utils';
+import { emptyFunction } from '@/utils';
 
 interface ConnectedEtherlinkAccountProps {
   address: string;
@@ -49,28 +50,13 @@ const ConnectedEtherlinkAccount = (props: ConnectedEtherlinkAccountProps) => {
 };
 
 export const EtherlinkAccount = () => {
-  const address = '0x4A1819c83A78C948db50f80fED82721Dd0401c9b';
-  const connectionState = EtherlinkAccountConnectionStatus.SwitchNetwork as EtherlinkAccountConnectionStatus;
+  const { address, connectionStatus, connect, switchNetwork, disconnect } = useEtherlinkAccount();
 
-  const handleSwitchNetwork = useCallback(
-    async () => {
-      console.log('Switching Network');
-      await wait(3000);
-      console.log('Network has been switched');
-    },
-    []
-  );
-
-  const handleDisconnect = useCallback(
-    async () => console.log('Disconnect Etherlink Wallet'),
-    []
-  );
-
-  return (connectionState === EtherlinkAccountConnectionStatus.NotConnected || connectionState === EtherlinkAccountConnectionStatus.AddNetwork)
-    ? <EtherlinkConnectButton connectionStatus={connectionState} />
+  return (connectionStatus <= EtherlinkAccountConnectionStatus.AddNetwork || !address)
+    ? <EtherlinkConnectButton connectionStatus={connectionStatus} onConnect={connect} />
     : <ConnectedEtherlinkAccount address={address}
-      isSupportedNetwork={connectionState !== EtherlinkAccountConnectionStatus.SwitchNetwork}
-      onSwitchNetwork={handleSwitchNetwork}
-      onDisconnect={handleDisconnect}
+      isSupportedNetwork={connectionStatus !== EtherlinkAccountConnectionStatus.SwitchNetwork}
+      onSwitchNetwork={switchNetwork}
+      onDisconnect={disconnect}
     />;
 };

@@ -30,10 +30,17 @@ const ConnectedTezosAccount = (props: ConnectedTezosAccountProps) => {
 
 export const TezosAccount = () => {
   const address = 'tz1M6VFkpALGXYoP5CvobR3z1pYu7KvirpMF';
-  const connectionState = TezosAccountConnectionStatus.Connected as TezosAccountConnectionStatus;
+  const connectionStatus = TezosAccountConnectionStatus.Connected as TezosAccountConnectionStatus;
+
+  const handleConnect = useCallback(
+    async () => console.log('Connect Tezos Wallet'),
+    []
+  );
 
   const handleSwitchNetwork = useCallback(
-    async () => console.log('Switch Network'),
+    async () => {
+      console.log('Switching Network');
+    },
     []
   );
 
@@ -42,8 +49,8 @@ export const TezosAccount = () => {
     []
   );
 
-  return connectionState === TezosAccountConnectionStatus.NotConnected
-    ? <TezosConnectButton />
+  return connectionStatus === TezosAccountConnectionStatus.NotConnected
+    ? <TezosConnectButton onConnect={handleConnect} />
     : <ConnectedTezosAccount address={address}
       onSwitchNetwork={handleSwitchNetwork}
       onDisconnect={handleDisconnect}

@@ -1,18 +1,24 @@
 import { memo } from 'react';
 
 import { SpinIcon } from '@/components/icons';
+import { config } from '@/config';
 
 export const enum TransferButtonDisallowedState {
   None = 0,
   Loading = 1,
   TokenTransferring = 2,
+
   TezosAccountNotConnected = 3,
-  EtherlinkAccountNotConnected = 4,
-  ZeroAmount = 5,
-  NoTokens = 7,
-  ZeroTokenBalance = 8,
-  ZeroNativeTokenBalance = 9,
-  NotEnough = 10,
+  EtherlinkWalletNotInstalled = 4,
+  EtherlinkAccountNotConnected = 5,
+  EtherlinkAccountInvalidNetwork = 6,
+
+  ZeroAmount = 7,
+  NoTokens = 8,
+  ZeroTokenBalance = 9,
+  ZeroNativeTokenBalance = 10,
+  NotEnough = 11,
+
   UnknownError = 100
 }
 
@@ -25,7 +31,9 @@ const classNameByDisallowedState = {
   [TransferButtonDisallowedState.Loading]: disabledButtonClassName,
   [TransferButtonDisallowedState.TokenTransferring]: disabledButtonClassName,
   [TransferButtonDisallowedState.TezosAccountNotConnected]: disabledButtonClassName,
+  [TransferButtonDisallowedState.EtherlinkWalletNotInstalled]: disabledButtonClassName,
   [TransferButtonDisallowedState.EtherlinkAccountNotConnected]: disabledButtonClassName,
+  [TransferButtonDisallowedState.EtherlinkAccountInvalidNetwork]: disabledButtonClassName,
   [TransferButtonDisallowedState.ZeroAmount]: disabledButtonClassName,
   [TransferButtonDisallowedState.NoTokens]: disabledButtonClassName,
   [TransferButtonDisallowedState.ZeroTokenBalance]: errorButtonClassName,
@@ -34,39 +42,33 @@ const classNameByDisallowedState = {
   [TransferButtonDisallowedState.UnknownError]: errorButtonClassName,
 } as const;
 
+const buttonTextMap = {
+  [TransferButtonDisallowedState.None]: ['Deposit', 'Withdraw'],
+  [TransferButtonDisallowedState.Loading]: 'Loading...',
+  [TransferButtonDisallowedState.TokenTransferring]: 'Transferring...',
+  [TransferButtonDisallowedState.TezosAccountNotConnected]: 'Please connect Tezos account',
+  [TransferButtonDisallowedState.EtherlinkWalletNotInstalled]: 'Please install MetaMask wallet',
+  [TransferButtonDisallowedState.EtherlinkAccountNotConnected]: 'Please connect Etherlink account',
+  [TransferButtonDisallowedState.EtherlinkAccountInvalidNetwork]: `Please switch to ${config.etherlink.networkName}`,
+  [TransferButtonDisallowedState.ZeroAmount]: 'Enter amount',
+  [TransferButtonDisallowedState.NoTokens]: ['Select token to deposit', 'Select token to withdraw'],
+  [TransferButtonDisallowedState.ZeroTokenBalance]: 'You have 0 tokens',
+  [TransferButtonDisallowedState.ZeroNativeTokenBalance]: ['You have 0 XTZ in Tezos', 'You have 0 XTZ in Etherlink'],
+  [TransferButtonDisallowedState.NotEnough]: 'Not enough',
+  [TransferButtonDisallowedState.UnknownError]: 'Unknown Error',
+} as const;
+
+const getButtonText = (disallowedState: TransferButtonDisallowedState, isDeposit: boolean): string => {
+  const text = buttonTextMap[disallowedState];
+
+  return typeof text === 'string' ? text : text[+!isDeposit];
+};
+
 interface TransferButtonProps {
   isDeposit: boolean;
   disallowedState: TransferButtonDisallowedState;
   onClick: () => void;
 }
-
-const getButtonText = (disallowedState: TransferButtonDisallowedState, isDeposit: boolean): string => {
-  switch (disallowedState) {
-    case TransferButtonDisallowedState.None:
-      return isDeposit ? 'Deposit' : 'Withdraw';
-    case TransferButtonDisallowedState.Loading:
-      return 'Loading...';
-    case TransferButtonDisallowedState.TokenTransferring:
-      return 'Transferring...';
-    case TransferButtonDisallowedState.TezosAccountNotConnected:
-      return 'Please connect Tezos account';
-    case TransferButtonDisallowedState.EtherlinkAccountNotConnected:
-      return 'Please connect Etherlink account';
-    case TransferButtonDisallowedState.ZeroAmount:
-      return 'Enter amount';
-    case TransferButtonDisallowedState.NoTokens:
-      return isDeposit ? 'Select token to deposit' : 'Select token to withdraw';
-    case TransferButtonDisallowedState.ZeroNativeTokenBalance:
-      return isDeposit ? 'You have 0 XTZ in Tezos' : 'You have 0 XTZ in Etherlink';
-    case TransferButtonDisallowedState.ZeroTokenBalance:
-      return 'You have 0 tokens';
-    case TransferButtonDisallowedState.NotEnough:
-      return 'Not enough';
-    case TransferButtonDisallowedState.UnknownError:
-    default:
-      return 'Unknown Error';
-  }
-};
 
 export const TransferButton = (props: TransferButtonProps) => {
   const buttonText = getButtonText(props.disallowedState, props.isDeposit);

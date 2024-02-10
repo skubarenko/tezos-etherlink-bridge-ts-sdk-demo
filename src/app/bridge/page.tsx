@@ -5,12 +5,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { BridgePure } from './Bridge';
 import { TransferError } from './TransferError';
 import { BridgeTransfer } from '@/components/Transfer';
+import { useAppContext, useEtherlinkAccount } from '@/hooks';
 import {
   BridgeTokenTransferKind, BridgeTokenTransferStatus,
   type BridgeTokenTransfer,
   SealedBridgeTokenWithdrawal
 } from '@/lib/bridgeOperations';
-import type { Token } from '@/models';
+import { TezosAccountConnectionStatus, type Token } from '@/models';
 import { tokenPairs } from '@/tokens';
 import { getErrorMessage, wait } from '@/utils';
 
@@ -20,6 +21,8 @@ export default function Bridge() {
   const [tokenBalances, setTokenBalances] = useState<ReadonlyMap<Token, string>>(emptyBalancesMap);
   const [lastTokenTransfer, setLastTokenTransfer] = useState<BridgeTokenTransfer>();
   const [lastError, setLastError] = useState<string>();
+  const { connectionStatus: etherlinkConnectionStatus } = useEtherlinkAccount();
+  const app = useAppContext();
 
   useEffect(() => {
     setTokenBalances(
@@ -206,9 +209,9 @@ export default function Bridge() {
   );
 
   return <main className="flex flex-col justify-center items-center pt-6">
-    <BridgePure isLoading={typeof window === 'undefined'}
-      isEtherlinkAccountConnected={true}
-      isTezosAccountConnected={true}
+    <BridgePure isLoading={!!app}
+      tezosAccountConnectionStatus={TezosAccountConnectionStatus.Connected}
+      etherlinkAccountConnectionStatus={etherlinkConnectionStatus}
       onDeposit={handleDeposit}
       onWithdraw={handleWithdraw}
       tokenPairs={tokenPairs}

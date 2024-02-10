@@ -8,11 +8,11 @@ export const config = {
   etherlink: {
     networkName: 'Etherlink Testnet',
     network: {
-      chaiId: 1337n,
+      chainId: '0x539',
       chainName: 'Etherlink Testnet',
       nativeCurrency: {
         name: 'XTZ',
-        currency: 'XTZ',
+        symbol: 'XTZ',
         decimals: 18
       },
       rpcUrls: [

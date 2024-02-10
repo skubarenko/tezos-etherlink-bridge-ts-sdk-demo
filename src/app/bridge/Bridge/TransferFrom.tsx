@@ -24,9 +24,7 @@ export const TransferFrom = (props: TransferFromProps) => {
   const handleTokensAmountChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     e => {
       try {
-        const preparedValue = e.target.value !== '0'
-          ? tokenUtils.truncateTokensAmountToDecimals(e.target.value, currentTokenDecimals)
-          : '';
+        const preparedValue = tokenUtils.truncateTokensAmountToDecimals(e.target.value, currentTokenDecimals);
 
         setInputTokensAmount(preparedValue);
         onAmountChanged(preparedValue);
@@ -38,10 +36,23 @@ export const TransferFrom = (props: TransferFromProps) => {
     [onAmountChanged, currentTokenDecimals]
   );
 
+  const handleInputBlur: React.FocusEventHandler<HTMLInputElement> = useCallback(
+    e => {
+      if (e.target.value === '0') {
+        setInputTokensAmount('');
+        onAmountChanged('');
+      }
+    },
+    [onAmountChanged]
+  );
+
   return <TransferPure title="Transfer From" isTezos={props.isTezos} balance={currentTokenBalance}>
     <>
       <input className="w-full py-2 pr-3 bg-transparent text-2xl focus:outline-none" value={inputTokensAmount} step={10 ** -currentTokenDecimals}
-        type="number" placeholder="0.00" onChange={handleTokensAmountChange} />
+        type="number" placeholder="0.00"
+        onChange={handleTokensAmountChange}
+        onBlur={handleInputBlur}
+      />
       <div className="flex-none text-right">
         <TokensListPure tokens={props.blockchainTokens}
           currentToken={props.currentToken}
