@@ -20,7 +20,7 @@ export const nativeEtherlinkToken: NativeEtherlinkToken = {
   type: 'native',
   name: 'Tezos',
   ticker: 'XTZ',
-  decimals: 6,
+  decimals: 18,
   iconUrl: xtzLogo.src
 };
 

@@ -7,7 +7,8 @@ import combineClassNames from 'clsx';
 export { combineClassNames };
 
 export const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
-export const emptyFunction = () => { };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const emptyFunction: () => any = () => { };
 
 export const getErrorMessage = (error: unknown) => error instanceof Error ? error.message
   : typeof error === 'string' ? error : 'Unknown error';
