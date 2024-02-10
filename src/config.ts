@@ -3,7 +3,8 @@ export const config = {
   isTestnet: true,
   tezos: {
     networkName: 'Nairobinet',
-    rpcUrl: 'https://rpc.tzkt.io/nairobinet'
+    rpcUrl: 'https://rpc.tzkt.io/nairobinet',
+    smartRollupAddress: 'sr1JZsZT5u27MUQXeTh1aHqZBo8NvyxRKnyv',
   },
   etherlink: {
     networkName: 'Etherlink Testnet',
@@ -22,6 +23,10 @@ export const config = {
         'https://blockscout.dipdup.net/'
       ]
     }
+  },
+  dipDup: {
+    baseUrl: 'https://etherlink-rollup-nairobi.dipdup.net',
+    webSocketApiBaseUrl: 'wss://etherlink-rollup-nairobi.dipdup.net'
   },
   bridgeSmartRollupNodeBaseUrl: 'https://etherlink-rollup-nairobi.dipdup.net'
 } as const;

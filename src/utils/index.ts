@@ -10,8 +10,8 @@ export const wait = (ms: number) => new Promise<void>(resolve => setTimeout(reso
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const emptyFunction: () => any = () => { };
 export const emptyAsyncFunction: () => Promise<any> = async () => { };
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
-export const getErrorMessage = (error: unknown) => error instanceof Error ? error.message
+export const getErrorMessage = (error: any) => typeof error?.message === 'string' ? error.message
   : typeof error === 'string' ? error : 'Unknown error';
 
+/* eslint-enable @typescript-eslint/no-explicit-any */

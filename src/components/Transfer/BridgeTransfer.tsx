@@ -1,11 +1,10 @@
+import {
+  BridgeTokenTransferKind, BridgeTokenTransferStatus,
+  type SealedBridgeTokenWithdrawal, type BridgeTokenTransfer, type FinishedBridgeTokenDeposit
+} from '@baking-bad/tezos-etherlink-bridge-sdk';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Transfer, TransferStatus } from './Transfer';
-import {
-  BridgeTokenTransferKind, BridgeTokenTransferStatus,
-  type TezosTransferTokensOperation, type EtherlinkTransferTokensOperation,
-  type SealedBridgeTokenWithdrawal, type BridgeTokenTransfer
-} from '@/lib/bridgeOperations';
 import { findTokenByInfo } from '@/tokens';
 import { getErrorMessage } from '@/utils';
 
@@ -28,8 +27,8 @@ export const BridgeTransfer = ({ bridgeTokenTransfer, onFinishWithdrawing }: Bri
   const [currentError, setCurrentError] = useState<string>();
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const tezosOperation: TezosTransferTokensOperation | undefined = (bridgeTokenTransfer as any).tezosOperation;
-  const etherlinkOperation: EtherlinkTransferTokensOperation | undefined = (bridgeTokenTransfer as any).etherlinkOperation;
+  const tezosOperation: FinishedBridgeTokenDeposit['tezosOperation'] | undefined = (bridgeTokenTransfer as any).tezosOperation;
+  const etherlinkOperation: FinishedBridgeTokenDeposit['etherlinkOperation'] | undefined = (bridgeTokenTransfer as any).etherlinkOperation;
   const rollupData = bridgeTokenTransfer.status === BridgeTokenTransferStatus.Sealed ? bridgeTokenTransfer.rollupData : undefined;
   /* eslint-enable @typescript-eslint/no-explicit-any */
 

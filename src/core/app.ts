@@ -1,10 +1,12 @@
 import { NetworkType, ColorMode } from '@airgap/beacon-types';
+import { createDefaultTokenBridge, type TokenBridge } from '@baking-bad/tezos-etherlink-bridge-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { TezosToolkit, Signer } from '@taquito/taquito';
 import Web3, { type MetaMaskProvider, type Web3EthExecutionAPI } from 'web3';
 
 import { TezosWalletSigner, MetaMaskEtherlinkWallet } from './wallets';
 import { config } from '@/config';
+import { tokenPairInfos } from '@/tokens';
 
 interface Window {
   ethereum?: MetaMaskProvider<Web3EthExecutionAPI>;
@@ -14,6 +16,7 @@ export class App {
   readonly etherlinkToolkit: Web3;
   readonly tezosToolkit: TezosToolkit;
   readonly beaconTezosWallet: BeaconWallet['client'];
+  readonly tokenBridge: TokenBridge;
 
   private readonly beaconWallet: BeaconWallet;
   private readonly tezosWalletSigner: Signer;
@@ -42,6 +45,24 @@ export class App {
     this.tezosToolkit.setWalletProvider(this.beaconWallet);
     this.tezosToolkit.setSignerProvider(this.tezosWalletSigner);
     this.beaconTezosWallet = this.beaconWallet.client;
+
+    this.tokenBridge = createDefaultTokenBridge({
+      tokenPairs: tokenPairInfos,
+      dipDup: {
+        baseUrl: config.dipDup.baseUrl,
+        autoUpdate: {
+          type: 'websocket',
+          webSocketApiBaseUrl: config.dipDup.webSocketApiBaseUrl
+        }
+      },
+      tezos: {
+        toolkit: this.tezosToolkit,
+        rollupAddress: config.tezos.smartRollupAddress,
+      },
+      etherlink: {
+        toolkit: this.etherlinkToolkit
+      }
+    });
   }
 
   get etherlinkWallet(): MetaMaskEtherlinkWallet | null {
@@ -54,6 +75,8 @@ export class App {
       if (metaMaskEthereumProvider)
         this._etherlinkWallet = new MetaMaskEtherlinkWallet(metaMaskEthereumProvider);
     }
+    // TODO
+    // await this.tokenBridge.start();
   }
 
   private loadMetaMaskEthereumProvider(timeout: number) {
