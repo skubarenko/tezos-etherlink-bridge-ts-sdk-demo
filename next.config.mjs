@@ -1,10 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  distDir: 'dist',
-
   /**
-   * 
    * @param {import('webpack').Configuration} config 
    * @param {Parameters<import('next').NextConfig['webpack']>[1]} context 
    * @returns 

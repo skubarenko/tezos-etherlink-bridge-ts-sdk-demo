@@ -13,6 +13,7 @@
 /certificates
 /.next/
 /dist
+/out
 
 # production
 /build
