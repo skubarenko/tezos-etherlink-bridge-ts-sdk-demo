@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@baking-bad/tezos-etherlink-bridge-sdk": "file:../tezos-etherlink-bridge-ts-sdk-dist",
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.1",
     "@taquito/beacon-wallet": "^19.0.1",
