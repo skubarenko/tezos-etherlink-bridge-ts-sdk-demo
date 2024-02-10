@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google';
 
 import { Header } from './components/Header';
 import { config } from '@/config';
-import { AppContextProvider, EtherlinkAccountProvider } from '@/hooks';
+import { AppContextProvider, EtherlinkAccountProvider, TezosAccountProvider } from '@/hooks';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -22,10 +22,12 @@ export default function RootLayout({
       <body className={`${inter.className} bg-white dark:bg-slate-900 max-w-screen-2xl m-auto`}>
         <AppContextProvider>
           <EtherlinkAccountProvider>
-            <>
-              <Header />
-              {children}
-            </>
+            <TezosAccountProvider>
+              <>
+                <Header />
+                {children}
+              </>
+            </TezosAccountProvider>
           </EtherlinkAccountProvider>
         </AppContextProvider>
       </body>

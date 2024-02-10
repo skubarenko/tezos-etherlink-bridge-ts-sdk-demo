@@ -5,13 +5,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { BridgePure } from './Bridge';
 import { TransferError } from './TransferError';
 import { BridgeTransfer } from '@/components/Transfer';
-import { useAppContext, useEtherlinkAccount } from '@/hooks';
+import { useAppContext, useEtherlinkAccount, useTezosAccount } from '@/hooks';
 import {
   BridgeTokenTransferKind, BridgeTokenTransferStatus,
   type BridgeTokenTransfer,
   SealedBridgeTokenWithdrawal
 } from '@/lib/bridgeOperations';
-import { TezosAccountConnectionStatus, type Token } from '@/models';
+import type { Token } from '@/models';
 import { tokenPairs } from '@/tokens';
 import { getErrorMessage, wait } from '@/utils';
 
@@ -22,6 +22,7 @@ export default function Bridge() {
   const [lastTokenTransfer, setLastTokenTransfer] = useState<BridgeTokenTransfer>();
   const [lastError, setLastError] = useState<string>();
   const { connectionStatus: etherlinkConnectionStatus } = useEtherlinkAccount();
+  const { connectionStatus: tezosConnectionStatus } = useTezosAccount();
   const app = useAppContext();
 
   useEffect(() => {
@@ -210,7 +211,7 @@ export default function Bridge() {
 
   return <main className="flex flex-col justify-center items-center pt-6">
     <BridgePure isLoading={!!app}
-      tezosAccountConnectionStatus={TezosAccountConnectionStatus.Connected}
+      tezosAccountConnectionStatus={tezosConnectionStatus}
       etherlinkAccountConnectionStatus={etherlinkConnectionStatus}
       onDeposit={handleDeposit}
       onWithdraw={handleWithdraw}

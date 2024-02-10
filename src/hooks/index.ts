@@ -1,2 +1,3 @@
 export { useAppContext, AppContextProvider } from './useAppContext';
-export * from './useEtherlinkAccount';
+export { useEtherlinkAccount, EtherlinkAccountProvider } from './useEtherlinkAccount';
+export { useTezosAccount, TezosAccountProvider } from './useTezosAccount';

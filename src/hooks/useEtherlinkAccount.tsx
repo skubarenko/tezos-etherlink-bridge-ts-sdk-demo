@@ -102,7 +102,6 @@ export const EtherlinkAccountProvider = (props: { children: ReactNode }) => {
     };
 
     etherlinkWallet.addEventListener('chainChanged', chainId => {
-      console.log('chainChanged', chainId);
       const connectionStatus = chainId === etherlinkWallet.chainId
         ? EtherlinkAccountConnectionStatus.Connected
         : EtherlinkAccountConnectionStatus.SwitchNetwork;
@@ -113,6 +112,8 @@ export const EtherlinkAccountProvider = (props: { children: ReactNode }) => {
           connectionStatus
         })
       );
+
+      console.log('Etherlink chain changed', chainId);
     });
 
     etherlinkWallet.addEventListener('accountsChanged', async accounts => {
@@ -123,7 +124,6 @@ export const EtherlinkAccountProvider = (props: { children: ReactNode }) => {
           ? EtherlinkAccountConnectionStatus.Connected
           : EtherlinkAccountConnectionStatus.SwitchNetwork
         : EtherlinkAccountConnectionStatus.NotConnected;
-      console.log('accountsChanged', address, currentChainId);
 
       setCurrentValue(previous => !previous.address || (previous.address === address && previous.connectionStatus === connectionStatus)
         ? previous
@@ -133,6 +133,8 @@ export const EtherlinkAccountProvider = (props: { children: ReactNode }) => {
           address,
         })
       );
+
+      console.log('Etherlink account changed', address, currentChainId);
     });
 
     loadConnectedAccount();

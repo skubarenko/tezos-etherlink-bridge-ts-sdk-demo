@@ -1,4 +1,4 @@
-import { NetworkType } from '@airgap/beacon-types';
+import { NetworkType, ColorMode } from '@airgap/beacon-types';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { TezosToolkit, Signer } from '@taquito/taquito';
 import Web3, { type MetaMaskProvider, type Web3EthExecutionAPI } from 'web3';
@@ -13,9 +13,9 @@ interface Window {
 export class App {
   readonly etherlinkToolkit: Web3;
   readonly tezosToolkit: TezosToolkit;
-  readonly beaconWallet: BeaconWallet;
-  readonly beaconDAppClient: BeaconWallet['client'];
+  readonly beaconTezosWallet: BeaconWallet['client'];
 
+  private readonly beaconWallet: BeaconWallet;
   private readonly tezosWalletSigner: Signer;
   private _etherlinkWallet: MetaMaskEtherlinkWallet | null;
 
@@ -35,12 +35,13 @@ export class App {
         type: NetworkType.CUSTOM,
         rpcUrl: config.tezos.rpcUrl
       },
-      featuredWallets: ['temple', 'kukai', 'metamask', 'trust']
+      featuredWallets: ['temple', 'atomex', 'metamask', 'trust'],
+      colorMode: ColorMode.DARK,
     });
-    this.beaconDAppClient = this.beaconWallet.client;
     this.tezosWalletSigner = new TezosWalletSigner(this.beaconWallet);
     this.tezosToolkit.setWalletProvider(this.beaconWallet);
     this.tezosToolkit.setSignerProvider(this.tezosWalletSigner);
+    this.beaconTezosWallet = this.beaconWallet.client;
   }
 
   get etherlinkWallet(): MetaMaskEtherlinkWallet | null {
