@@ -1,0 +1,19 @@
+diff --git a/node_modules/@airgap/beacon-ui/dist/esm/index.js b/node_modules/@airgap/beacon-ui/dist/esm/index.js
+index ce835f4..3053911 100644
+--- a/node_modules/@airgap/beacon-ui/dist/esm/index.js
++++ b/node_modules/@airgap/beacon-ui/dist/esm/index.js
+@@ -1,4 +1,4 @@
+-import { effect, style, template, delegateEvents, insert, memo, addEventListener, createComponent, className, setAttribute, isServer, render } from 'solid-js/web';
++import * as solidJsWeb from 'solid-js/web';
+ import { onMount, onCleanup, For, createSignal, createEffect } from 'solid-js';
+ import { ColorMode, StorageKey, NetworkType, ExtensionMessageTarget } from '@airgap/beacon-types';
+ import QRCode from 'qrcode-svg';
+@@ -6,6 +6,8 @@ import { Logger, Serializer, windowRef } from '@airgap/beacon-core';
+ import { PostMessageTransport } from '@airgap/beacon-transport-postmessage';
+ import { generateGUID } from '@airgap/beacon-utils';
+ 
++const { effect, style, template, delegateEvents, insert, memo, addEventListener, createComponent, className, setAttribute, isServer, render } = solidJsWeb;
++
+ const extensionList = [{
+   "key": "spire_chrome",
+   "id": "gpfndedineagiepkpinficbcbbgjoenn",
