@@ -26,8 +26,8 @@ export const config = {
     }
   },
   dipDup: {
-    baseUrl: 'https://etherlink-rollup-nairobi.dipdup.net',
-    webSocketApiBaseUrl: 'wss://etherlink-rollup-nairobi.dipdup.net'
+    baseUrl: 'https://etherlink-bridge-indexer.dipdup.net',
+    webSocketApiBaseUrl: 'wss://etherlink-bridge-indexer.dipdup.net'
   },
   bridgeSmartRollupNodeBaseUrl: 'https://etherlink-rollup-nairobi.dipdup.net'
 } as const;

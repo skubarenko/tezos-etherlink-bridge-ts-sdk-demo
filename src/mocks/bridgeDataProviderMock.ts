@@ -236,6 +236,8 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
   }
 
   private async runDepositCycle(pendingDeposit: PendingBridgeTokenDeposit) {
+    this.updateTokenTransfer(pendingDeposit);
+
     await wait(5000);
 
     this.updateTokenTransfer({
@@ -271,6 +273,8 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
   }
 
   private async runWithdrawalCycle(pendingWithdrawal: PendingBridgeTokenWithdrawal) {
+    this.updateTokenTransfer(pendingWithdrawal);
+
     await wait(3000);
 
     const rollupData: FinishedBridgeTokenWithdrawal['rollupData'] = {

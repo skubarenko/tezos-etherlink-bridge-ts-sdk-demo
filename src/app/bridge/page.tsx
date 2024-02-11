@@ -19,7 +19,7 @@ import { getErrorMessage } from '@/utils';
 
 const emptyBalancesMap = new Map<Token, string>();
 const getActualTokenTransferStateValue = (newTokenTransfer: BridgeTokenTransfer) => (previousTokenTransfer: BridgeTokenTransfer | undefined) => {
-  return !previousTokenTransfer || (bridgeUtils.getInitialOperationHash(previousTokenTransfer) === bridgeUtils.getInitialOperationHash(newTokenTransfer))
+  return previousTokenTransfer && bridgeUtils.getInitialOperationHash(previousTokenTransfer) === bridgeUtils.getInitialOperationHash(newTokenTransfer)
     ? newTokenTransfer
     : previousTokenTransfer;
 };
@@ -36,11 +36,12 @@ export default function Bridge() {
   useEffect(() => {
     setTokenBalances(
       new Map<Token, string>()
-        .set(tokenPairs[0]!.tezos, '10.1043')
-        .set(tokenPairs[0]!.etherlink, '1')
-        .set(tokenPairs[1]!.tezos, '143')
-        .set(tokenPairs[1]!.etherlink, '245')
+        .set(tokenPairs[0]!.tezos, '1040.1043')
+        .set(tokenPairs[0]!.etherlink, '40.493')
+        .set(tokenPairs[1]!.tezos, '12570')
+        .set(tokenPairs[1]!.etherlink, '0')
         .set(tokenPairs[2]!.tezos, '0')
+        .set(tokenPairs[2]!.etherlink, '1093')
     );
   }, []);
 
@@ -87,7 +88,7 @@ export default function Bridge() {
         console.log('Deposit', amount, token, receiverAddress);
 
         const { tokenTransfer } = await tokenBridge.deposit(amount, token);
-        setLastTokenTransfer(getActualTokenTransferStateValue(tokenTransfer));
+        setLastTokenTransfer(tokenTransfer);
         tokenBridge.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
@@ -118,7 +119,7 @@ export default function Bridge() {
         console.log('Withdraw', amount, token, receiverAddress);
 
         const { tokenTransfer } = await tokenBridge.startWithdraw(amount, token);
-        setLastTokenTransfer(getActualTokenTransferStateValue(tokenTransfer));
+        setLastTokenTransfer(tokenTransfer);
         tokenBridge.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
