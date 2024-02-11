@@ -1,4 +1,4 @@
-import { ArrowsUpDownIcon, QueueListIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
+import { ArrowsUpDownIcon, QueueListIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 import { AccountsPure } from './Accounts';
@@ -16,10 +16,6 @@ export const Header = () => {
         <Link href="/transfers" className="flex items-center mx-3 dark:hover:text-blue-300">
           <QueueListIcon className="h-5 w-5 mr-1 align-middle" />
           Transfers
-        </Link>
-        <Link href="/tokens" className="flex items-center mx-3 dark:hover:text-blue-300">
-          <PlusCircleIcon className="h-5 w-5 mr-1 align-middle" />
-          Listed Tokens
         </Link>
       </nav>
     </div>
