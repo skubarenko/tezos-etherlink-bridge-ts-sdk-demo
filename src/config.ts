@@ -3,8 +3,8 @@ export const config = {
   isTestnet: true,
   isMock: true,
   tezos: {
-    networkName: 'Nairobinet',
-    rpcUrl: 'https://rpc.tzkt.io/nairobinet',
+    networkName: 'Oxfordnet',
+    rpcUrl: 'https://rpc.tzkt.io/oxfordnet',
     smartRollupAddress: 'sr1JZsZT5u27MUQXeTh1aHqZBo8NvyxRKnyv',
   },
   etherlink: {
