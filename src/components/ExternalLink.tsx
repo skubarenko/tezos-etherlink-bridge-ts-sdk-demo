@@ -7,11 +7,11 @@ type ExternalLinkProps = { showArrowIcon?: boolean } & Omit<
   'target' | 'blank'
 >;
 
-export const ExternalLink = (props: ExternalLinkProps) => {
+export const ExternalLink = ({ showArrowIcon, ...props }: ExternalLinkProps) => {
   return <a {...props} target="_blank" rel="noreferrer"
-    className={`${combineClassNames('flex items-center dark:text-purple-300 dark:hover:text-purple-500', props.className)}`}
+    className={`${combineClassNames('flex items-center dark:text-violet-300 dark:hover:text-violet-400', props.className)}`}
   >
     {props.children}
-    {(props.showArrowIcon ?? true) && <ArrowUpRightIcon className="inline h-4 w-4 ml-1 -mb-0.5" />}
+    {(showArrowIcon ?? true) && <ArrowUpRightIcon className="inline h-4 w-4 ml-1 -mb-0.5" />}
   </a>;
 };

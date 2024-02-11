@@ -1,11 +1,7 @@
-// https://github.com/vercel/next.js/issues/53715
-/* eslint-disable @next/next/no-img-element */
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { Fragment, memo } from 'react';
 
 import { BlockchainPure } from '../Blockchain';
-import { TezosLogo } from '../icons';
-import etherlinkLogo from '@/public/icons/etherlinkLogo.webp';
 
 export interface ProgressSegment {
   readonly backgroundColorCssClass: `${'dark:bg' | 'bg'}-${string}`
@@ -27,12 +23,12 @@ export const Progress = (props: ProgressProps) => {
     <div className="flex-grow flex justify-between items-center ml-2">
       {props.segments.map(
         (segment, index) => <Fragment key={index}>
-          {(index > 0) && <div className={`flex-none h-2 w-2 rotate-45 ${segment.backgroundColorCssClass} ${segment.isPulse ? 'animate-pulse' : ''}`}>
+          {(index > 0) && <div className={`flex-none h-2 w-2 rotate-45 ${segment.backgroundColorCssClass} ${segment.isPulse ? 'animate-progress' : ''}`}>
           </div>}
-          <hr className={`w-full border-dotted border-t-2 ${segment.borderColorCssClass} ${segment.isPulse ? 'animate-pulse' : ''}`} />
+          <hr className={`w-full border-dotted border-t-2 ${segment.borderColorCssClass} ${segment.isPulse ? 'animate-progress' : ''}`} />
         </Fragment>
       )}
-      {lastSegment && <ChevronRightIcon className={`flex-none h-5 w-5 -ml-2 ${lastSegment.textColorCssClass} ${lastSegment.isPulse ? 'animate-pulse' : ''}`} />}
+      {lastSegment && <ChevronRightIcon width={18} height={18} className={`flex-none -ml-2 ${lastSegment.textColorCssClass} ${lastSegment.isPulse ? 'animate-progress' : ''}`} />}
     </div>
     <BlockchainPure isTezos={!props.isDeposit} />
   </div>;

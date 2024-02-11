@@ -36,7 +36,7 @@ const ctezEtherlinkToken: ERC20EtherlinkToken = {
   type: 'erc20',
   name: 'Ctez',
   ticker: 'CTEZ',
-  address: '0x8554cd57c0c3e5ab9d1782c9063279fa9bfa4680',
+  address: '0xe448b46E3c9167961ae4bD498E8dFb78Ae97da8a',
   decimals: 0,
   iconUrl: ctezLogo.src
 };

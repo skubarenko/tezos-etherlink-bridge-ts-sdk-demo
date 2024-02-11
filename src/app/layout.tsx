@@ -19,7 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning={true} className="dark">
-      <body className={`${inter.className} bg-white dark:bg-slate-900 max-w-screen-2xl m-auto`}>
+      <body className={`${inter.className} max-w-screen-2xl m-auto
+        bg-gray-50 dark:text-gray-100 dark:bg-slate-900`}
+      >
         <AppContextProvider>
           <EtherlinkAccountProvider>
             <TezosAccountProvider>

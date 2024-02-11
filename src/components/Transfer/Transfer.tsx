@@ -4,10 +4,11 @@ import { ProgressPure, ProgressSegment } from './Progress';
 import { RollupDataLink, type RollupData } from './RollupDataLink';
 import { TransferError } from './TransferError';
 import { ExplorerLinkPure } from '../ExplorerLink';
+import { ExternalLink } from '../ExternalLink';
 import { TokenPure } from '../Token';
 import { SpinIcon } from '../icons';
 import type { Token } from '@/models';
-import { emptyFunction, tokenUtils } from '@/utils';
+import { blockchainUtils, emptyFunction, tokenUtils } from '@/utils';
 import { LinkType } from '@/utils/blockchainUtils';
 
 export const enum TransferStatus {
@@ -19,9 +20,9 @@ export const enum TransferStatus {
 }
 
 const inProgressSegment: ProgressSegment = {
-  backgroundColorCssClass: 'dark:bg-blue-600',
-  borderColorCssClass: 'dark:border-blue-600',
-  textColorCssClass: 'dark:text-blue-600',
+  backgroundColorCssClass: 'dark:bg-cyan-500',
+  borderColorCssClass: 'dark:border-cyan-500',
+  textColorCssClass: 'dark:text-cyan-500',
   isPulse: true
 };
 const completedSegment: ProgressSegment = {
@@ -54,15 +55,15 @@ const getProgressSegments = (isDeposit: boolean, status: TransferStatus): readon
 const statusDataMap = {
   [TransferStatus.Pending]: {
     title: 'Pending',
-    backgroundColorCssClass: 'dark:bg-blue-700'
+    backgroundColorCssClass: 'dark:bg-cyan-700'
   },
   [TransferStatus.Created]: {
     title: 'Created',
-    backgroundColorCssClass: 'dark:bg-blue-700'
+    backgroundColorCssClass: 'dark:bg-cyan-700'
   },
   [TransferStatus.Sealed]: {
     title: 'Sealed',
-    backgroundColorCssClass: 'dark:bg-blue-700'
+    backgroundColorCssClass: 'dark:bg-cyan-700'
   },
   [TransferStatus.Finished]: {
     title: 'Completed',
@@ -125,10 +126,15 @@ export const Transfer = (props: TransferProps) => {
   dark:text-gray-100 dark:bg-slate-800"
   >
     <div className="flex justify-between items-center text-lg">
-      <div className="flex">
+      <div className="flex items-center">
         {props.token && <>
-          <span className="mr-2.5">{tokenUtils.convertTokensRawAmountToAmount(props.amount, props.token.decimals)}</span>
-          <TokenPure token={props.token} iconSize={20} iconClassName="mr-1" />
+          <span className="mr-1.5">{tokenUtils.convertTokensRawAmountToAmount(props.amount, props.token.decimals)}</span>
+          {props.token.type !== 'native'
+            ? <ExternalLink href={blockchainUtils.getTokenExplorerUrl(props.token)} showArrowIcon={false}>
+              <TokenPure token={props.token} iconSize={17} iconClassName="mr-0.5 -mt-0.5" />
+            </ExternalLink>
+            : <TokenPure token={props.token} iconSize={17} iconClassName="mr-0.5 -mt-0.5" />
+          }
         </>}
       </div>
       <div className={`-mt-4 -mr-4 pt-4 pr-2 pb-2 pl-2 w-32 rounded-bl-xl text-center ${statusDataMap[props.status].backgroundColorCssClass}`}>

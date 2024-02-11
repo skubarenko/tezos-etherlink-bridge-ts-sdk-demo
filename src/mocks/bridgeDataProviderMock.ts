@@ -122,18 +122,14 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
     }
 
     tokenTransfers.sort((tokenTransferA, tokenTransferB) => {
-      const initialTimestampA = tokenTransferA.kind === BridgeTokenTransferKind.Deposit
-        ? tokenTransferA.tezosOperation.timestamp
-        : tokenTransferA.etherlinkOperation.timestamp;
-      const initialTimestampB = tokenTransferB.kind === BridgeTokenTransferKind.Deposit
-        ? tokenTransferB.tezosOperation.timestamp
-        : tokenTransferB.etherlinkOperation.timestamp;
+      const initialOperationA = bridgeUtils.getInitialOperation(tokenTransferA);
+      const initialOperationB = bridgeUtils.getInitialOperation(tokenTransferB);
 
-      return initialTimestampA.localeCompare(initialTimestampB);
+      return initialOperationB.timestamp.localeCompare(initialOperationA.timestamp);
     });
     tokenTransfers.slice(offset, offset + limit);
 
-    await wait(1000);
+    // await wait(1000);
 
     return tokenTransfers;
   }

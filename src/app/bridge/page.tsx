@@ -134,8 +134,7 @@ export default function Bridge() {
       if (!tokenBridge)
         return;
 
-      const { tokenTransfer } = await tokenBridge.finishWithdraw(sealedWithdrawal);
-      setLastTokenTransfer(getActualTokenTransferStateValue(tokenTransfer));
+      await tokenBridge.finishWithdraw(sealedWithdrawal);
     },
     [tokenBridge]
   );

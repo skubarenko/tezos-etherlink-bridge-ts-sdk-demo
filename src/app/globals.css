@@ -2,13 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {}
+@media (prefers-color-scheme: dark) {}
 
-@media (prefers-color-scheme: dark) {
-  :root {}
+* {
+  scrollbar-width: thin;
 }
-
-body {}
 
 @layer base {
 
