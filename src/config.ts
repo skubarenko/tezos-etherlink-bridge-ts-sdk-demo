@@ -1,6 +1,7 @@
 export const config = {
   appName: 'Tez2Eth',
   isTestnet: true,
+  isMock: true,
   tezos: {
     networkName: 'Nairobinet',
     rpcUrl: 'https://rpc.tzkt.io/nairobinet',

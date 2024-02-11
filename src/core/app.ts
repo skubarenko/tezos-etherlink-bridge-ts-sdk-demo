@@ -1,11 +1,16 @@
 import { NetworkType, ColorMode } from '@airgap/beacon-types';
-import { createDefaultTokenBridge, type TokenBridge } from '@baking-bad/tezos-etherlink-bridge-sdk';
+import {
+  createDefaultTokenBridge, defaultEtherlinkKernelAddress, defaultEtherlinkWithdrawPrecompileAddress,
+  LocalTokensBridgeDataProvider,
+  type TokenBridge
+} from '@baking-bad/tezos-etherlink-bridge-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { TezosToolkit, Signer } from '@taquito/taquito';
 import Web3, { type MetaMaskProvider, type Web3EthExecutionAPI } from 'web3';
 
 import { TezosWalletSigner, MetaMaskEtherlinkWallet } from './wallets';
 import { config } from '@/config';
+import { BridgeDataProviderMock, TokenBridgeMock } from '@/mocks';
 import { tokenPairInfos } from '@/tokens';
 
 interface Window {
@@ -46,23 +51,25 @@ export class App {
     this.tezosToolkit.setSignerProvider(this.tezosWalletSigner);
     this.beaconTezosWallet = this.beaconWallet.client;
 
-    this.tokenBridge = createDefaultTokenBridge({
-      tokenPairs: tokenPairInfos,
-      dipDup: {
-        baseUrl: config.dipDup.baseUrl,
-        autoUpdate: {
-          type: 'websocket',
-          webSocketApiBaseUrl: config.dipDup.webSocketApiBaseUrl
+    this.tokenBridge = config.isMock
+      ? this.createTokenBridgeMock()
+      : createDefaultTokenBridge({
+        tokenPairs: tokenPairInfos,
+        dipDup: {
+          baseUrl: config.dipDup.baseUrl,
+          autoUpdate: {
+            type: 'websocket',
+            webSocketApiBaseUrl: config.dipDup.webSocketApiBaseUrl
+          }
+        },
+        tezos: {
+          toolkit: this.tezosToolkit,
+          rollupAddress: config.tezos.smartRollupAddress,
+        },
+        etherlink: {
+          toolkit: this.etherlinkToolkit
         }
-      },
-      tezos: {
-        toolkit: this.tezosToolkit,
-        rollupAddress: config.tezos.smartRollupAddress,
-      },
-      etherlink: {
-        toolkit: this.etherlinkToolkit
-      }
-    });
+      });
   }
 
   get etherlinkWallet(): MetaMaskEtherlinkWallet | null {
@@ -75,8 +82,8 @@ export class App {
       if (metaMaskEthereumProvider)
         this._etherlinkWallet = new MetaMaskEtherlinkWallet(metaMaskEthereumProvider);
     }
-    // TODO
-    // await this.tokenBridge.start();
+
+    await this.tokenBridge.start();
   }
 
   private loadMetaMaskEthereumProvider(timeout: number) {
@@ -99,6 +106,32 @@ export class App {
       }
       catch (error) {
         reject(error);
+      }
+    });
+  }
+
+  private createTokenBridgeMock() {
+    const tokensProvider = new LocalTokensBridgeDataProvider(tokenPairInfos);
+    const mockProvider = new BridgeDataProviderMock(tokensProvider);
+
+    return new TokenBridgeMock({
+      tezos: {
+        toolkit: this.tezosToolkit,
+        bridgeOptions: {
+          rollupAddress: config.tezos.smartRollupAddress
+        }
+      },
+      etherlink: {
+        toolkit: this.etherlinkToolkit,
+        bridgeOptions: {
+          kernelAddress: defaultEtherlinkKernelAddress,
+          withdrawPrecompileAddress: defaultEtherlinkWithdrawPrecompileAddress
+        }
+      },
+      bridgeDataProviders: {
+        tokens: tokensProvider,
+        transfers: mockProvider,
+        balances: mockProvider
       }
     });
   }
