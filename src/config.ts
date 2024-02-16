@@ -5,7 +5,7 @@ export const config = {
   tezos: {
     networkName: 'Oxfordnet',
     rpcUrl: 'https://rpc.tzkt.io/oxfordnet',
-    smartRollupAddress: 'sr1JZsZT5u27MUQXeTh1aHqZBo8NvyxRKnyv',
+    smartRollupAddress: 'sr1T4XVcVtBRzYy52edVTdgup9Kip4Wrmn97',
   },
   etherlink: {
     networkName: 'Etherlink Testnet',
@@ -29,5 +29,5 @@ export const config = {
     baseUrl: 'https://etherlink-bridge-indexer.dipdup.net',
     webSocketApiBaseUrl: 'wss://etherlink-bridge-indexer.dipdup.net'
   },
-  bridgeSmartRollupNodeBaseUrl: 'https://etherlink-rollup-nairobi.dipdup.net'
+  bridgeSmartRollupNodeBaseUrl: 'https://etherlink-rollup-oxford.dipdup.net'
 } as const;
