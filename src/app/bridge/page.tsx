@@ -4,6 +4,7 @@ import { AbortedBeaconError } from '@airgap/beacon-core';
 import {
   BridgeTokenTransferStatus,
   utils as bridgeUtils,
+  type TokenBridge,
   type BridgeTokenTransfer,
   type SealedBridgeTokenWithdrawal,
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
@@ -14,37 +15,61 @@ import { TransferError } from './TransferError';
 import { BridgeTransfer } from '@/components/Transfer';
 import { useAppContext, useEtherlinkAccount, useTezosAccount, useTokenTransfersStoreContext } from '@/hooks';
 import type { Token } from '@/models';
-import { tokenPairs } from '@/tokens';
-import { getErrorMessage } from '@/utils';
+import { findTokenByInfo, tokenPairs, tokens } from '@/tokens';
+import { getErrorMessage, tokenUtils } from '@/utils';
 
-const emptyBalancesMap = new Map<Token, string>();
 const getActualTokenTransferStateValue = (newTokenTransfer: BridgeTokenTransfer) => (previousTokenTransfer: BridgeTokenTransfer | undefined) => {
   return previousTokenTransfer && bridgeUtils.getInitialOperationHash(previousTokenTransfer) === bridgeUtils.getInitialOperationHash(newTokenTransfer)
     ? newTokenTransfer
     : previousTokenTransfer;
 };
 
+const emptyBalancesMap = new Map<Token, string>();
+const loadBalances = async (
+  tokenBridge: TokenBridge,
+  tezosAccountAddress: string | undefined,
+  etherlinkAccountAddress: string | undefined
+): Promise<ReadonlyMap<Token, string>> => {
+  const tezosAndEtherlinkAccountBalances = await Promise.all([
+    tezosAccountAddress && tokenBridge.data.getBalances(tezosAccountAddress, tokens),
+    etherlinkAccountAddress && tokenBridge.data.getBalances(etherlinkAccountAddress, tokens)
+  ]);
+
+  const newBalancesMap = new Map<Token, string>();
+  let isTezos = true;
+  for (const accountBalances of tezosAndEtherlinkAccountBalances) {
+    if (accountBalances)
+      accountBalances.tokenBalances.forEach(balanceInfo => {
+        const token = findTokenByInfo(balanceInfo.token, isTezos);
+        if (token)
+          newBalancesMap.set(token, tokenUtils.convertTokensRawAmountToAmount(balanceInfo.balance, token.decimals));
+      });
+
+    isTezos = false;
+  }
+
+  return newBalancesMap;
+};
+
 export default function Bridge() {
   const [tokenBalances, setTokenBalances] = useState<ReadonlyMap<Token, string>>(emptyBalancesMap);
   const [lastTokenTransfer, setLastTokenTransfer] = useState<BridgeTokenTransfer>();
   const [lastError, setLastError] = useState<string>();
-  const { connectionStatus: etherlinkConnectionStatus } = useEtherlinkAccount();
-  const { connectionStatus: tezosConnectionStatus } = useTezosAccount();
+  const { connectionStatus: etherlinkConnectionStatus, address: etherlinkAccountAddress } = useEtherlinkAccount();
+  const { connectionStatus: tezosConnectionStatus, address: tezosAccountAddress } = useTezosAccount();
   const app = useAppContext();
   const { dispatch: tokenTransfersStoreDispatch } = useTokenTransfersStoreContext();
   const tokenBridge = app?.tokenBridge;
 
   useEffect(() => {
-    setTokenBalances(
-      new Map<Token, string>()
-        .set(tokenPairs[0]!.tezos, '1040.1043')
-        .set(tokenPairs[0]!.etherlink, '40.493')
-        .set(tokenPairs[1]!.tezos, '12570')
-        .set(tokenPairs[1]!.etherlink, '0')
-        .set(tokenPairs[2]!.tezos, '0')
-        .set(tokenPairs[2]!.etherlink, '1093')
-    );
-  }, []);
+    if (!tokenBridge)
+      return;
+
+    loadBalances(tokenBridge, tezosAccountAddress, etherlinkAccountAddress)
+      .then(tokenBalances => setTokenBalances(tokenBalances));
+  },
+    [etherlinkAccountAddress, tezosAccountAddress, tokenBridge]
+  );
 
   const handleTokenTransferUpdated = useCallback(
     (tokenTransfer: BridgeTokenTransfer) => {
@@ -52,12 +77,17 @@ export default function Bridge() {
       console.log('Token Transfer Updated', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
 
       setLastTokenTransfer(getActualTokenTransferStateValue(tokenTransfer));
+      if (tokenBridge) {
+        loadBalances(tokenBridge, tezosAccountAddress, etherlinkAccountAddress)
+          .then(tokenBalances => setTokenBalances(tokenBalances));
+      }
+
       if (tokenTransfer.status === BridgeTokenTransferStatus.Finished) {
         console.log(`Unsubscribe from the ${initialOperationHash} token transfer`);
         tokenBridge?.stream.unsubscribeFromTokenTransfer(tokenTransfer);
       }
     },
-    [tokenBridge]
+    [tokenBridge, etherlinkAccountAddress, tezosAccountAddress]
   );
 
   useEffect(
@@ -90,7 +120,7 @@ export default function Bridge() {
 
         const { tokenTransfer } = await tokenBridge.deposit(amount, token);
         setLastTokenTransfer(tokenTransfer);
-        tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
+        tokenTransfersStoreDispatch({ type: 'added-or-updated', payload: tokenTransfer });
         tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
@@ -122,7 +152,7 @@ export default function Bridge() {
 
         const { tokenTransfer } = await tokenBridge.startWithdraw(amount, token);
         setLastTokenTransfer(tokenTransfer);
-        tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
+        tokenTransfersStoreDispatch({ type: 'added-or-updated', payload: tokenTransfer });
         tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
@@ -138,7 +168,8 @@ export default function Bridge() {
       if (!tokenBridge)
         return;
 
-      await tokenBridge.finishWithdraw(sealedWithdrawal);
+      const result = await tokenBridge.finishWithdraw(sealedWithdrawal);
+      await result.finishWithdrawOperation.confirmation();
     },
     [tokenBridge]
   );

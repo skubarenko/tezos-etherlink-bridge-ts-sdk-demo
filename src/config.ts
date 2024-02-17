@@ -1,14 +1,16 @@
 export const config = {
   appName: 'Tez2Eth',
   isTestnet: true,
-  isMock: true,
+  isMock: false,
   tezos: {
     networkName: 'Oxfordnet',
     rpcUrl: 'https://rpc.tzkt.io/oxfordnet',
+    tzktApiBaseUrl: 'https://api.oxfordnet.tzkt.io',
     smartRollupAddress: 'sr1T4XVcVtBRzYy52edVTdgup9Kip4Wrmn97',
   },
   etherlink: {
     networkName: 'Etherlink Testnet',
+    rpcUrl: 'https://etherlink.dipdup.net',
     network: {
       chainId: '0x539',
       chainName: 'Etherlink Testnet',

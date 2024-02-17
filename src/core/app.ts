@@ -62,8 +62,8 @@ export class App {
           baseUrl: config.dipDup.baseUrl,
           webSocketApiBaseUrl: config.dipDup.webSocketApiBaseUrl,
         },
-        tzKTApiBaseUrl: '',
-        etherlinkRpcUrl: config.etherlink.network.rpcUrls[0],
+        tzKTApiBaseUrl: config.tezos.tzktApiBaseUrl,
+        etherlinkRpcUrl: config.etherlink.rpcUrl,
         tezos: {
           toolkit: this.tezosToolkit,
           rollupAddress: config.tezos.smartRollupAddress,

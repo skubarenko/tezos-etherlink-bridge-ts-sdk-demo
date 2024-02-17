@@ -152,8 +152,8 @@ export const Transfer = (props: TransferProps) => {
       }
     </div>
     <div className="flex justify-between items-center mt-1 text-xs">
-      {firstOperationTimestamp && <span>{firstOperationTimestamp}</span>}
-      {lastOperationTimestamp && <span>{lastOperationTimestamp}</span>}
+      {firstOperationTimestamp && <span>{new Date(firstOperationTimestamp).toLocaleString()}</span>}
+      {lastOperationTimestamp && <span>{new Date(lastOperationTimestamp).toLocaleString()}</span>}
     </div>
     {props.status === TransferStatus.Sealed && <div className="flex justify-center items-center">
       <button className="w-full mt-4 h-12 rounded-lg select-none cursor-pointer 

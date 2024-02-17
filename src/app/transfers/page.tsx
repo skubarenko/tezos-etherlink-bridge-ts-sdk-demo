@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  BridgeTokenTransferStatus,
   utils as bridgeUtils,
   type BridgeTokenTransfer,
   type SealedBridgeTokenWithdrawal,
@@ -10,54 +11,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BridgeTransfer } from '@/components/Transfer';
 import { SpinIcon } from '@/components/icons';
 import { useAppContext, useEtherlinkAccount, useTezosAccount, useTokenTransfersStoreContext } from '@/hooks';
-
-const setTokenTransfersActionState = (updatedTokenTransfer: BridgeTokenTransfer) => (tokenTransfers: readonly BridgeTokenTransfer[]): readonly BridgeTokenTransfer[] => {
-  const updatedTokenTransferOperation = bridgeUtils.getInitialOperation(updatedTokenTransfer);
-
-  if (tokenTransfers[0]) {
-    const lastTokenTransferOperation = bridgeUtils.getInitialOperation(tokenTransfers[0]);
-
-    const startSliceIndex = lastTokenTransferOperation.hash === updatedTokenTransferOperation.hash
-      ? 1
-      : lastTokenTransferOperation.timestamp.localeCompare(updatedTokenTransferOperation.timestamp) < 1
-        ? 0
-        : -1;
-
-    if (startSliceIndex > -1) {
-      const updatedTokenTransfers = tokenTransfers.slice(startSliceIndex);
-      updatedTokenTransfers.unshift(updatedTokenTransfer);
-
-      return updatedTokenTransfers;
-    }
-  }
-
-  if (tokenTransfers[tokenTransfers.length - 1]) {
-    const firstTokenTransferOperation = bridgeUtils.getInitialOperation(tokenTransfers[tokenTransfers.length - 1]);
-
-    if (firstTokenTransferOperation.hash === updatedTokenTransferOperation.hash) {
-      const updatedTokenTransfers = tokenTransfers.slice(0, tokenTransfers.length - 1);
-      updatedTokenTransfers.push(updatedTokenTransfer);
-
-      return updatedTokenTransfers;
-    }
-
-    if (firstTokenTransferOperation.timestamp.localeCompare(updatedTokenTransferOperation.timestamp) === 1)
-      return tokenTransfers;
-  }
-
-  let isUpdated = false;
-  const updatedTokenTransfers = [];
-  for (const tokenTransfer of tokenTransfers) {
-    const tokenTransferOperation = bridgeUtils.getInitialOperation(tokenTransfer);
-    if (updatedTokenTransferOperation.hash === tokenTransferOperation.hash) {
-      isUpdated = true;
-      updatedTokenTransfers.push(updatedTokenTransfer);
-    } else
-      updatedTokenTransfers.push(tokenTransfer);
-  }
-
-  return isUpdated ? updatedTokenTransfers : tokenTransfers;
-};
 
 export default function Transfers() {
   const app = useAppContext();
@@ -81,9 +34,13 @@ export default function Transfers() {
       const initialOperationHash = bridgeUtils.getInitialOperationHash(tokenTransfer);
       console.log('Token Transfer Updated', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
 
-      tokenTransfersDispatch({ type: 'updated', payload: tokenTransfer });
+      tokenTransfersDispatch({ type: 'added-or-updated', payload: tokenTransfer });
+      if (tokenTransfer.status === BridgeTokenTransferStatus.Finished) {
+        console.log(`Unsubscribe from the ${initialOperationHash} token transfer`);
+        tokenBridge?.stream.unsubscribeFromTokenTransfer(tokenTransfer);
+      }
     },
-    [tokenTransfersDispatch]
+    [tokenBridge, tokenTransfersDispatch]
   );
 
   useEffect(
@@ -99,6 +56,11 @@ export default function Transfers() {
         const tokenTransfers = await tokenBridge.data.getAccountTokenTransfers(accounts);
         tokenTransfersDispatch({ type: 'loaded', payload: tokenTransfers });
         setIsTransfersLoading(false);
+
+        tokenTransfers.forEach(t => {
+          if (t.status !== BridgeTokenTransferStatus.Finished)
+            tokenBridge.stream.subscribeToTokenTransfer(t);
+        });
       };
 
       tokenBridge.addEventListener('tokenTransferUpdated', handleTokenTransferUpdated);
@@ -108,7 +70,7 @@ export default function Transfers() {
 
       return () => {
         tokenBridge.removeEventListener('tokenTransferUpdated', handleTokenTransferUpdated);
-        tokenBridge.stream.unsubscribeFromAccountTokenTransfers(accounts);
+        tokenBridge.stream.unsubscribeFromAllSubscriptions();
       };
     },
     [tokenBridge, tezosAccount, etherlinkAccount, tokenTransfersDispatch, handleTokenTransferUpdated]
@@ -119,7 +81,8 @@ export default function Transfers() {
       if (!tokenBridge)
         return;
 
-      await tokenBridge.finishWithdraw(sealedWithdrawal);
+      const result = await tokenBridge.finishWithdraw(sealedWithdrawal);
+      await result.finishWithdrawOperation.confirmation();
     },
     [tokenBridge]
   );

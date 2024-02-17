@@ -1,3 +1,4 @@
+import { AbortedBeaconError } from '@airgap/beacon-core';
 import {
   BridgeTokenTransferKind, BridgeTokenTransferStatus,
   type SealedBridgeTokenWithdrawal, type BridgeTokenTransfer, type FinishedBridgeTokenDeposit
@@ -39,7 +40,11 @@ export const BridgeTransfer = ({ bridgeTokenTransfer, onFinishWithdrawing }: Bri
       setCurrentError(undefined);
       return bridgeTokenTransfer.status === BridgeTokenTransferStatus.Sealed
         ? onFinishWithdrawing(bridgeTokenTransfer)
-          .catch(error => setCurrentError(getErrorMessage(error)))
+          .catch(error => {
+            if (error instanceof AbortedBeaconError)
+              return;
+            setCurrentError(getErrorMessage(error));
+          })
         : Promise.resolve();
     },
     [bridgeTokenTransfer, onFinishWithdrawing]
