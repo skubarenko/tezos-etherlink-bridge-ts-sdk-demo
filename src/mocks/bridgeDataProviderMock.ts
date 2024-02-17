@@ -4,7 +4,8 @@ import {
   BridgeTokenTransferStatus,
   utils as bridgeUtils,
 
-  type AccountTokenBalanceInfo,
+  type AccountTokenBalance,
+  type AccountTokenBalances,
   type BalancesBridgeDataProvider,
   type BridgeTokenTransfer,
   type EtherlinkToken,
@@ -83,95 +84,66 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
 
   async getTokenTransfers(): Promise<BridgeTokenTransfer[]>;
   async getTokenTransfers(offset: number, limit: number): Promise<BridgeTokenTransfer[]>;
-  async getTokenTransfers(accountAddress: string): Promise<BridgeTokenTransfer[]>;
-  async getTokenTransfers(accountAddresses: readonly string[]): Promise<BridgeTokenTransfer[]>;
-  async getTokenTransfers(accountAddress: string, offset: number, limit: number): Promise<BridgeTokenTransfer[]>;
-  async getTokenTransfers(accountAddresses: readonly string[], offset: number, limit: number): Promise<BridgeTokenTransfer[]>;
-  async getTokenTransfers(
-    offsetOrAccountAddressOfAddresses?: number | string | readonly string[],
-    _offsetOrLimit?: number,
-    limitParameter?: number
+  async getTokenTransfers(offset?: number, limit?: number): Promise<BridgeTokenTransfer[]>;
+  async getTokenTransfers(offset?: number, limit?: number): Promise<BridgeTokenTransfer[]> {
+    return this.getTokenTransfersInternal(null, offset, limit);
+  }
+
+  async getAccountTokenTransfers(accountAddress: string): Promise<BridgeTokenTransfer[]>;
+  async getAccountTokenTransfers(accountAddresses: readonly string[]): Promise<BridgeTokenTransfer[]>;
+  async getAccountTokenTransfers(accountAddress: string, offset: number, limit: number): Promise<BridgeTokenTransfer[]>;
+  async getAccountTokenTransfers(accountAddresses: readonly string[], offset: number, limit: number): Promise<BridgeTokenTransfer[]>;
+  async getAccountTokenTransfers(accountAddressOfAddresses: string | readonly string[], offset?: number, limit?: number): Promise<BridgeTokenTransfer[]>;
+  async getAccountTokenTransfers(
+    accountAddressOfAddresses: string | readonly string[],
+    offset?: number,
+    limit?: number
   ): Promise<BridgeTokenTransfer[]> {
-    let accountAddresses: string | readonly string[] | undefined;
-    let offset: number | undefined;
-    let limit: number | undefined;
-
-    if (offsetOrAccountAddressOfAddresses !== undefined) {
-      if (typeof offsetOrAccountAddressOfAddresses === 'number') {
-        offset = offsetOrAccountAddressOfAddresses;
-        limit = _offsetOrLimit;
-      }
-      else {
-        accountAddresses = offsetOrAccountAddressOfAddresses;
-        offset = _offsetOrLimit;
-        limit = limitParameter;
-      }
-    }
-
-    offset = offset && offset > 0 ? offset : 0;
-    limit = limit && limit > 0 ? limit : this.defaultLoadDataLimit;
-
-    const tokenTransfers: BridgeTokenTransfer[] = [];
-    for (const tokenTransfer of this.tokenTransfersStore.values()) {
-      if (!accountAddresses || (typeof accountAddresses === 'string'
-        ? bridgeUtils.isBridgeTokenTransferOwner(tokenTransfer, accountAddresses)
-        : accountAddresses.some(address => bridgeUtils.isBridgeTokenTransferOwner(tokenTransfer, address))
-      )) {
-        tokenTransfers.push(tokenTransfer);
-      }
-    }
-
-    tokenTransfers.sort((tokenTransferA, tokenTransferB) => {
-      const initialOperationA = bridgeUtils.getInitialOperation(tokenTransferA);
-      const initialOperationB = bridgeUtils.getInitialOperation(tokenTransferB);
-
-      return initialOperationB.timestamp.localeCompare(initialOperationA.timestamp);
-    });
-    tokenTransfers.slice(offset, offset + limit);
-
-    await wait(1000);
-
-    return tokenTransfers;
+    return this.getTokenTransfersInternal(accountAddressOfAddresses, offset, limit);
   }
 
   subscribeToTokenTransfer(operationHash: string): void;
   subscribeToTokenTransfer(tokenTransfer: BridgeTokenTransfer): void;
   subscribeToTokenTransfer(operationHashOrTokenTransfer: string | BridgeTokenTransfer): void;
-  subscribeToTokenTransfer(operationHashOrTokenTransfer: unknown): void {
+  subscribeToTokenTransfer(_operationHashOrTokenTransfer: unknown): void {
   }
 
   unsubscribeFromTokenTransfer(operationHash: string): void;
   unsubscribeFromTokenTransfer(tokenTransfer: BridgeTokenTransfer): void;
   unsubscribeFromTokenTransfer(operationHashOrTokenTransfer: string | BridgeTokenTransfer): void;
-  unsubscribeFromTokenTransfer(operationHashOrTokenTransfer: unknown): void {
+  unsubscribeFromTokenTransfer(_operationHashOrTokenTransfer: unknown): void {
   }
 
-  subscribeToTokenTransfers(): void;
-  subscribeToTokenTransfers(accountAddress: string): void;
-  subscribeToTokenTransfers(accountAddresses: readonly string[]): void;
-  subscribeToTokenTransfers(accountAddressOrAddresses?: string | readonly string[] | undefined): void;
-  subscribeToTokenTransfers(accountAddressOrAddresses?: unknown): void {
+  subscribeToTokenTransfers(): void {
   }
 
-  unsubscribeFromTokenTransfers(): void;
-  unsubscribeFromTokenTransfers(accountAddress: string): void;
-  unsubscribeFromTokenTransfers(accountAddresses: readonly string[]): void;
-  unsubscribeFromTokenTransfers(accountAddressOrAddresses?: string | readonly string[] | undefined): void;
-  unsubscribeFromTokenTransfers(accountAddressOrAddresses?: unknown): void {
+  unsubscribeFromTokenTransfers(): void {
   }
 
-  unsubscribeFromAllTokenTransfers(): void {
+  subscribeToAccountTokenTransfers(accountAddress: string): void;
+  subscribeToAccountTokenTransfers(accountAddresses: readonly string[]): void;
+  subscribeToAccountTokenTransfers(accountAddressOrAddresses?: string | readonly string[] | undefined): void;
+  subscribeToAccountTokenTransfers(_accountAddressOrAddresses?: unknown): void {
   }
 
-  getBalance(accountAddress: string, token: TezosToken | EtherlinkToken): Promise<AccountTokenBalanceInfo> {
+  unsubscribeFromAccountTokenTransfers(accountAddress: string): void;
+  unsubscribeFromAccountTokenTransfers(accountAddresses: readonly string[]): void;
+  unsubscribeFromAccountTokenTransfers(accountAddressOrAddresses?: string | readonly string[] | undefined): void;
+  unsubscribeFromAccountTokenTransfers(_accountAddressOrAddresses?: unknown): void {
+  }
+
+  unsubscribeFromAllSubscriptions(): void {
+  }
+
+  getBalance(_accountAddress: string, _token: TezosToken | EtherlinkToken): Promise<AccountTokenBalance> {
     throw new Error('Method not implemented.');
   }
 
-  getBalances(accountAddress: string): Promise<AccountTokenBalanceInfo>;
-  getBalances(accountAddress: string, tokens: ReadonlyArray<TezosToken | EtherlinkToken>): Promise<AccountTokenBalanceInfo>;
-  getBalances(accountAddress: string, offset: number, limit: number): Promise<AccountTokenBalanceInfo>;
-  getBalances(accountAddress: string, tokensOrOffset?: number | ReadonlyArray<TezosToken | EtherlinkToken> | undefined, limit?: number | undefined): Promise<AccountTokenBalanceInfo>;
-  getBalances(accountAddress: unknown, tokensOrOffset?: unknown, limit?: unknown): Promise<AccountTokenBalanceInfo> {
+  getBalances(accountAddress: string): Promise<AccountTokenBalances>;
+  getBalances(accountAddress: string, tokens: ReadonlyArray<TezosToken | EtherlinkToken>): Promise<AccountTokenBalances>;
+  getBalances(accountAddress: string, offset: number, limit: number): Promise<AccountTokenBalances>;
+  getBalances(accountAddress: string, tokensOrOffset?: number | ReadonlyArray<TezosToken | EtherlinkToken> | undefined, limit?: number | undefined): Promise<AccountTokenBalances>;
+  getBalances(_accountAddress: unknown, _tokensOrOffset?: unknown, _limit?: unknown): Promise<AccountTokenBalances> {
     throw new Error('Method not implemented.');
   }
 
@@ -228,7 +200,7 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
         blockId: 0,
         hash: this.getTezosOperationHash(),
         amount: sealedWithdrawal.etherlinkOperation.amount,
-        token: tokenPair.tezos.token,
+        token: tokenPair.tezos,
         fee: 0n,
         timestamp: this.getOperationTimestamp()
       }
@@ -263,7 +235,7 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
         blockId: 0,
         hash: this.getEtherlinkOperationHash(),
         amount: pendingDeposit.tezosOperation.amount,
-        token: tokenPair.etherlink.token,
+        token: tokenPair.etherlink,
         fee: 0n,
         timestamp: this.getOperationTimestamp()
       }
@@ -301,6 +273,37 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
       etherlinkOperation,
       rollupData
     });
+  }
+
+  private async getTokenTransfersInternal(
+    addressOrAddresses: string | readonly string[] | undefined | null,
+    offset: number | undefined | null,
+    limit: number | undefined | null
+  ): Promise<BridgeTokenTransfer[]> {
+    offset = offset && offset > 0 ? offset : 0;
+    limit = limit && limit > 0 ? limit : this.defaultLoadDataLimit;
+
+    const tokenTransfers: BridgeTokenTransfer[] = [];
+    for (const tokenTransfer of this.tokenTransfersStore.values()) {
+      if (!addressOrAddresses || (typeof addressOrAddresses === 'string'
+        ? bridgeUtils.isBridgeTokenTransferOwner(tokenTransfer, addressOrAddresses)
+        : addressOrAddresses.some(address => bridgeUtils.isBridgeTokenTransferOwner(tokenTransfer, address))
+      )) {
+        tokenTransfers.push(tokenTransfer);
+      }
+    }
+
+    tokenTransfers.sort((tokenTransferA, tokenTransferB) => {
+      const initialOperationA = bridgeUtils.getInitialOperation(tokenTransferA);
+      const initialOperationB = bridgeUtils.getInitialOperation(tokenTransferB);
+
+      return initialOperationB.timestamp.localeCompare(initialOperationA.timestamp);
+    });
+    tokenTransfers.slice(offset, offset + limit);
+
+    await wait(1000);
+
+    return tokenTransfers;
   }
 
   private updateTokenTransfer(tokenTransfer: BridgeTokenTransfer) {

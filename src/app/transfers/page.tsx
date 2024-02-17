@@ -2,7 +2,6 @@
 
 import {
   utils as bridgeUtils,
-  BridgeTokenTransferStatus,
   type BridgeTokenTransfer,
   type SealedBridgeTokenWithdrawal,
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
@@ -83,13 +82,8 @@ export default function Transfers() {
       console.log('Token Transfer Updated', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
 
       tokenTransfersDispatch({ type: 'updated', payload: tokenTransfer });
-
-      if (tokenTransfer.status === BridgeTokenTransferStatus.Finished) {
-        console.log(`Unsubscribe from the ${initialOperationHash} token transfer`);
-        tokenBridge?.unsubscribeFromTokenTransfer(tokenTransfer);
-      }
     },
-    [tokenBridge, tokenTransfersDispatch]
+    [tokenTransfersDispatch]
   );
 
   useEffect(
@@ -99,20 +93,22 @@ export default function Transfers() {
 
       const accounts = tezosAccount && etherlinkAccount
         ? [tezosAccount, etherlinkAccount]
-        : (tezosAccount || etherlinkAccount);
+        : (tezosAccount || etherlinkAccount!);
 
       const loadTokenTransfers = async () => {
-        const tokenTransfers = await tokenBridge.data.getTokenTransfers(accounts);
+        const tokenTransfers = await tokenBridge.data.getAccountTokenTransfers(accounts);
         tokenTransfersDispatch({ type: 'loaded', payload: tokenTransfers });
         setIsTransfersLoading(false);
       };
 
-      tokenBridge.events.tokenTransferUpdated.addListener(handleTokenTransferUpdated);
+      tokenBridge.addEventListener('tokenTransferUpdated', handleTokenTransferUpdated);
       setIsTransfersLoading(true);
       loadTokenTransfers();
+      tokenBridge.stream.subscribeToAccountTokenTransfers(accounts);
 
       return () => {
-        tokenBridge.events.tokenTransferUpdated.removeListener(handleTokenTransferUpdated);
+        tokenBridge.removeEventListener('tokenTransferUpdated', handleTokenTransferUpdated);
+        tokenBridge.stream.unsubscribeFromAccountTokenTransfers(accounts);
       };
     },
     [tokenBridge, tezosAccount, etherlinkAccount, tokenTransfersDispatch, handleTokenTransferUpdated]

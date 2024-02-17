@@ -1,5 +1,7 @@
+import type { FA2TezosToken } from '@baking-bad/tezos-etherlink-bridge-sdk';
+
 import { config } from '@/config';
-import { FA2TezosToken, Token } from '@/models';
+import type { Token } from '@/models';
 
 export const enum LinkType {
   Address = 0,

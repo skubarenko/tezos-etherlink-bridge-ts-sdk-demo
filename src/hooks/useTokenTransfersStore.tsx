@@ -23,10 +23,18 @@ const tokenTransfersReducer = (state: ReadonlyMap<string, BridgeTokenTransfer>, 
       action.payload.forEach(transfer => newState.set(bridgeUtils.getInitialOperationHash(transfer), transfer));
       return newState;
     }
-    case 'added':
-    case 'updated': {
+    case 'added': {
       const newState = new Map(state);
       newState.set(bridgeUtils.getInitialOperationHash(action.payload), action.payload);
+      return newState;
+    }
+    case 'updated': {
+      const initialOperationHash = bridgeUtils.getInitialOperationHash(action.payload);
+      if (!state.has(initialOperationHash))
+        return state;
+
+      const newState = new Map(state);
+      newState.set(initialOperationHash, action.payload);
       return newState;
     }
   }

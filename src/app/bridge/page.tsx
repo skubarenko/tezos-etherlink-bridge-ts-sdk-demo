@@ -54,7 +54,7 @@ export default function Bridge() {
       setLastTokenTransfer(getActualTokenTransferStateValue(tokenTransfer));
       if (tokenTransfer.status === BridgeTokenTransferStatus.Finished) {
         console.log(`Unsubscribe from the ${initialOperationHash} token transfer`);
-        tokenBridge?.unsubscribeFromTokenTransfer(tokenTransfer);
+        tokenBridge?.stream.unsubscribeFromTokenTransfer(tokenTransfer);
       }
     },
     [tokenBridge]
@@ -65,10 +65,10 @@ export default function Bridge() {
       if (!tokenBridge)
         return;
 
-      tokenBridge.events.tokenTransferUpdated.addListener(handleTokenTransferUpdated);
+      tokenBridge.addEventListener('tokenTransferUpdated', handleTokenTransferUpdated);
 
       return () => {
-        tokenBridge.events.tokenTransferUpdated.removeListener(handleTokenTransferUpdated);
+        tokenBridge.removeEventListener('tokenTransferUpdated', handleTokenTransferUpdated);
       };
     },
     [tokenBridge, handleTokenTransferUpdated]
@@ -91,7 +91,7 @@ export default function Bridge() {
         const { tokenTransfer } = await tokenBridge.deposit(amount, token);
         setLastTokenTransfer(tokenTransfer);
         tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
-        tokenBridge.subscribeToTokenTransfer(tokenTransfer);
+        tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
         if (error instanceof AbortedBeaconError)
@@ -123,7 +123,7 @@ export default function Bridge() {
         const { tokenTransfer } = await tokenBridge.startWithdraw(amount, token);
         setLastTokenTransfer(tokenTransfer);
         tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
-        tokenBridge.subscribeToTokenTransfer(tokenTransfer);
+        tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
         setLastTokenTransfer(undefined);

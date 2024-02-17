@@ -1,7 +1,7 @@
 import { NetworkType, ColorMode } from '@airgap/beacon-types';
 import {
   createDefaultTokenBridge, defaultEtherlinkKernelAddress, defaultEtherlinkWithdrawPrecompileAddress,
-  LocalTokensBridgeDataProvider,
+  LocalTokensBridgeDataProvider, LogLevel,
   type TokenBridge
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
@@ -11,7 +11,7 @@ import Web3, { type MetaMaskProvider, type Web3EthExecutionAPI } from 'web3';
 import { TezosWalletSigner, MetaMaskEtherlinkWallet } from './wallets';
 import { config } from '@/config';
 import { BridgeDataProviderMock, TokenBridgeMock } from '@/mocks';
-import { tokenPairInfos } from '@/tokens';
+import { tokenPairs } from '@/tokens';
 
 interface Window {
   ethereum?: MetaMaskProvider<Web3EthExecutionAPI>;
@@ -54,14 +54,16 @@ export class App {
     this.tokenBridge = config.isMock
       ? this.createTokenBridgeMock()
       : createDefaultTokenBridge({
-        tokenPairs: tokenPairInfos,
+        logging: {
+          logLevel: LogLevel.Debug
+        },
+        tokenPairs,
         dipDup: {
           baseUrl: config.dipDup.baseUrl,
-          autoUpdate: {
-            type: 'websocket',
-            webSocketApiBaseUrl: config.dipDup.webSocketApiBaseUrl
-          }
+          webSocketApiBaseUrl: config.dipDup.webSocketApiBaseUrl,
         },
+        tzKTApiBaseUrl: '',
+        etherlinkRpcUrl: config.etherlink.network.rpcUrls[0],
         tezos: {
           toolkit: this.tezosToolkit,
           rollupAddress: config.tezos.smartRollupAddress,
@@ -82,8 +84,6 @@ export class App {
       if (metaMaskEthereumProvider)
         this._etherlinkWallet = new MetaMaskEtherlinkWallet(metaMaskEthereumProvider);
     }
-
-    await this.tokenBridge.start();
   }
 
   private loadMetaMaskEthereumProvider(timeout: number) {
@@ -111,7 +111,7 @@ export class App {
   }
 
   private createTokenBridgeMock() {
-    const tokensProvider = new LocalTokensBridgeDataProvider(tokenPairInfos);
+    const tokensProvider = new LocalTokensBridgeDataProvider(tokenPairs);
     const mockProvider = new BridgeDataProviderMock(tokensProvider);
 
     return new TokenBridgeMock({
