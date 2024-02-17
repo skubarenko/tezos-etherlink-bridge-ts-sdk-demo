@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BridgePure } from './Bridge';
 import { TransferError } from './TransferError';
 import { BridgeTransfer } from '@/components/Transfer';
-import { useAppContext, useEtherlinkAccount, useTezosAccount } from '@/hooks';
+import { useAppContext, useEtherlinkAccount, useTezosAccount, useTokenTransfersStoreContext } from '@/hooks';
 import type { Token } from '@/models';
 import { tokenPairs } from '@/tokens';
 import { getErrorMessage } from '@/utils';
@@ -31,6 +31,7 @@ export default function Bridge() {
   const { connectionStatus: etherlinkConnectionStatus } = useEtherlinkAccount();
   const { connectionStatus: tezosConnectionStatus } = useTezosAccount();
   const app = useAppContext();
+  const { dispatch: tokenTransfersStoreDispatch } = useTokenTransfersStoreContext();
   const tokenBridge = app?.tokenBridge;
 
   useEffect(() => {
@@ -89,6 +90,7 @@ export default function Bridge() {
 
         const { tokenTransfer } = await tokenBridge.deposit(amount, token);
         setLastTokenTransfer(tokenTransfer);
+        tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
         tokenBridge.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
@@ -99,7 +101,7 @@ export default function Bridge() {
         setLastError(getErrorMessage(error));
       }
     },
-    [tokenBridge]
+    [tokenBridge, tokenTransfersStoreDispatch]
   );
 
   const handleWithdraw = useCallback(
@@ -120,6 +122,7 @@ export default function Bridge() {
 
         const { tokenTransfer } = await tokenBridge.startWithdraw(amount, token);
         setLastTokenTransfer(tokenTransfer);
+        tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
         tokenBridge.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
@@ -127,7 +130,7 @@ export default function Bridge() {
         setLastError(getErrorMessage(error));
       }
     },
-    [tokenBridge]
+    [tokenBridge, tokenTransfersStoreDispatch]
   );
 
   const handleFinishWithdrawing = useCallback(

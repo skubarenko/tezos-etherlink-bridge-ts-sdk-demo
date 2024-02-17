@@ -3,7 +3,12 @@ import { Inter } from 'next/font/google';
 
 import { Header } from './components/Header';
 import { config } from '@/config';
-import { AppContextProvider, EtherlinkAccountProvider, TezosAccountProvider } from '@/hooks';
+import {
+  AppContextProvider,
+  EtherlinkAccountProvider,
+  TezosAccountProvider,
+  TokenTransfersStoreContextProvider
+} from '@/hooks';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -25,10 +30,12 @@ export default function RootLayout({
         <AppContextProvider>
           <EtherlinkAccountProvider>
             <TezosAccountProvider>
-              <>
-                <Header />
-                {children}
-              </>
+              <TokenTransfersStoreContextProvider>
+                <>
+                  <Header />
+                  {children}
+                </>
+              </TokenTransfersStoreContextProvider>
             </TezosAccountProvider>
           </EtherlinkAccountProvider>
         </AppContextProvider>

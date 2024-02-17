@@ -129,7 +129,7 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
     });
     tokenTransfers.slice(offset, offset + limit);
 
-    // await wait(1000);
+    await wait(1000);
 
     return tokenTransfers;
   }
@@ -236,9 +236,7 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
   }
 
   private async runDepositCycle(pendingDeposit: PendingBridgeTokenDeposit) {
-    this.updateTokenTransfer(pendingDeposit);
-
-    await wait(5000);
+    await wait(10000);
 
     this.updateTokenTransfer({
       ...pendingDeposit,
@@ -273,8 +271,6 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
   }
 
   private async runWithdrawalCycle(pendingWithdrawal: PendingBridgeTokenWithdrawal) {
-    this.updateTokenTransfer(pendingWithdrawal);
-
     await wait(3000);
 
     const rollupData: FinishedBridgeTokenWithdrawal['rollupData'] = {

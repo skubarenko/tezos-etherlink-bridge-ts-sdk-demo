@@ -6,11 +6,11 @@ import {
   type BridgeTokenTransfer,
   type SealedBridgeTokenWithdrawal,
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BridgeTransfer } from '@/components/Transfer';
 import { SpinIcon } from '@/components/icons';
-import { useAppContext, useEtherlinkAccount, useTezosAccount } from '@/hooks';
+import { useAppContext, useEtherlinkAccount, useTezosAccount, useTokenTransfersStoreContext } from '@/hooks';
 
 const setTokenTransfersActionState = (updatedTokenTransfer: BridgeTokenTransfer) => (tokenTransfers: readonly BridgeTokenTransfer[]): readonly BridgeTokenTransfer[] => {
   const updatedTokenTransferOperation = bridgeUtils.getInitialOperation(updatedTokenTransfer);
@@ -63,24 +63,33 @@ const setTokenTransfersActionState = (updatedTokenTransfer: BridgeTokenTransfer)
 export default function Transfers() {
   const app = useAppContext();
   const tokenBridge = app?.tokenBridge;
-  const [tokenTransfers, setTokenTransfers] = useState<readonly BridgeTokenTransfer[]>([]);
-  const [isTransfersLoading, setIsTransfersLoading] = useState(false);
+  const { tokenTransfers: tokenTransfersMap, dispatch: tokenTransfersDispatch } = useTokenTransfersStoreContext();
   const { address: tezosAccount } = useTezosAccount();
   const { address: etherlinkAccount } = useEtherlinkAccount();
+  const [isTransfersLoading, setIsTransfersLoading] = useState(true);
+  const tokenTransfers = useMemo(
+    () => [...tokenTransfersMap.values()].sort((tokenTransferA, tokenTransferB) => {
+      const initialOperationA = bridgeUtils.getInitialOperation(tokenTransferA);
+      const initialOperationB = bridgeUtils.getInitialOperation(tokenTransferB);
+
+      return initialOperationB.timestamp.localeCompare(initialOperationA.timestamp);
+    }),
+    [tokenTransfersMap]
+  );
 
   const handleTokenTransferUpdated = useCallback(
     (tokenTransfer: BridgeTokenTransfer) => {
       const initialOperationHash = bridgeUtils.getInitialOperationHash(tokenTransfer);
       console.log('Token Transfer Updated', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
 
-      setTokenTransfers(setTokenTransfersActionState(tokenTransfer));
+      tokenTransfersDispatch({ type: 'updated', payload: tokenTransfer });
 
       if (tokenTransfer.status === BridgeTokenTransferStatus.Finished) {
         console.log(`Unsubscribe from the ${initialOperationHash} token transfer`);
         tokenBridge?.unsubscribeFromTokenTransfer(tokenTransfer);
       }
     },
-    [tokenBridge]
+    [tokenBridge, tokenTransfersDispatch]
   );
 
   useEffect(
@@ -94,7 +103,7 @@ export default function Transfers() {
 
       const loadTokenTransfers = async () => {
         const tokenTransfers = await tokenBridge.data.getTokenTransfers(accounts);
-        setTokenTransfers(tokenTransfers);
+        tokenTransfersDispatch({ type: 'loaded', payload: tokenTransfers });
         setIsTransfersLoading(false);
       };
 
@@ -106,7 +115,7 @@ export default function Transfers() {
         tokenBridge.events.tokenTransferUpdated.removeListener(handleTokenTransferUpdated);
       };
     },
-    [tokenBridge, handleTokenTransferUpdated, tezosAccount, etherlinkAccount]
+    [tokenBridge, tezosAccount, etherlinkAccount, tokenTransfersDispatch, handleTokenTransferUpdated]
   );
 
   const handleFinishWithdrawing = useCallback(
