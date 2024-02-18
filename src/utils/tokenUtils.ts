@@ -1,3 +1,5 @@
+import { padStart } from './textUtils';
+
 const getDecimalSeparatorIndex = (value: string): number => {
   for (let i = value.length - 1; i >= 0; i--) {
     const character = value[i];
@@ -47,7 +49,7 @@ export const convertTokensRawAmountToAmount = (amount: bigint, decimals: number)
   const integerPartLength = amountString.length - decimals;
   const amountWithDecimals = integerPartLength > 0
     ? amountString.substring(0, integerPartLength) + '.' + amountString.substring(integerPartLength)
-    : '0.' + amountString;
+    : '0.' + padStart(amountString, decimals, '0');
 
   let excessTrailingZeroIndex = -1;
   for (let i = amountWithDecimals.length - 1; i >= 0; i--) {
