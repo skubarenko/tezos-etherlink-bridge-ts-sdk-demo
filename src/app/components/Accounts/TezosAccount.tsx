@@ -29,7 +29,7 @@ const ConnectedTezosAccount = (props: ConnectedTezosAccountProps) => {
 export const TezosAccount = () => {
   const { address, connectionStatus, connect, disconnect } = useTezosAccount();
 
-  return (connectionStatus < TezosAccountConnectionStatus.Connected || !address)
+  return (connectionStatus === TezosAccountConnectionStatus.NotConnected || !address)
     ? <TezosConnectButton onConnect={connect} />
     : <ConnectedTezosAccount address={address} onDisconnect={disconnect} />;
 };

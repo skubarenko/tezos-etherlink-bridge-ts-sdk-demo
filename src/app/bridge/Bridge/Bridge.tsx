@@ -61,8 +61,6 @@ export const Bridge = (props: BridgeProps) => {
         setTransferButtonDisallowedState(TransferButtonDisallowedState.TokenTransferring);
       else if (props.tezosAccountConnectionStatus === TezosAccountConnectionStatus.NotConnected)
         setTransferButtonDisallowedState(TransferButtonDisallowedState.TezosAccountNotConnected);
-      else if (props.etherlinkAccountConnectionStatus === EtherlinkAccountConnectionStatus.NotInstalled)
-        setTransferButtonDisallowedState(TransferButtonDisallowedState.EtherlinkWalletNotInstalled);
       else if (props.etherlinkAccountConnectionStatus === EtherlinkAccountConnectionStatus.NotConnected)
         setTransferButtonDisallowedState(TransferButtonDisallowedState.EtherlinkAccountNotConnected);
       else if (props.etherlinkAccountConnectionStatus === EtherlinkAccountConnectionStatus.SwitchNetwork)

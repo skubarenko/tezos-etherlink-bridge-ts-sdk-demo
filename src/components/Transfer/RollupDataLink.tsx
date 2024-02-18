@@ -16,6 +16,6 @@ export const RollupDataLink = (props: RollupDataLinkProps) => {
   if (!props.rollupData || !props.rollupData.commitment || !props.rollupData.proof)
     return null;
 
-  const url = `${config.bridgeSmartRollupNodeBaseUrl}/global/block/head/helpers/proofs/outbox/${props.rollupData.outboxMessageLevel}/messages?index=${props.rollupData.outboxMessageIndex}`;
+  const url = `${config.bridge.smartRollupNodeBaseUrl}/global/block/head/helpers/proofs/outbox/${props.rollupData.outboxMessageLevel}/messages?index=${props.rollupData.outboxMessageIndex}`;
   return <ExternalLink href={url}>Rollup Data</ExternalLink>;
 };

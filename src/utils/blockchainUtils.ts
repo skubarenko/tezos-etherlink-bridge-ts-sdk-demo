@@ -15,11 +15,10 @@ export const enum ExplorerType {
   Blockscout = 2
 }
 
-const tezosNetworkName = config.tezos.networkName.toLowerCase();
 const explorerBaseUrls = {
-  [ExplorerType.TzKT]: `https://${tezosNetworkName}.tzkt.io`,
-  [ExplorerType.BCD]: `https://better-call.dev/${tezosNetworkName}`,
-  [ExplorerType.Blockscout]: 'https://blockscout.dipdup.net',
+  [ExplorerType.TzKT]: `https://${config.tezos.network.name}.tzkt.io`,
+  [ExplorerType.BCD]: `https://better-call.dev/${config.tezos.network.name}`,
+  [ExplorerType.Blockscout]: config.etherlink.network.blockExplorerUrl,
 };
 
 export const getExplorerUrl = (value: string, type: LinkType, explorer?: ExplorerType): string => {

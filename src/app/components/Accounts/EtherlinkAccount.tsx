@@ -52,7 +52,7 @@ const ConnectedEtherlinkAccount = (props: ConnectedEtherlinkAccountProps) => {
 export const EtherlinkAccount = () => {
   const { address, connectionStatus, connect, switchNetwork, disconnect } = useEtherlinkAccount();
 
-  return (connectionStatus <= EtherlinkAccountConnectionStatus.AddNetwork || !address)
+  return (connectionStatus === EtherlinkAccountConnectionStatus.NotConnected || !address)
     ? <EtherlinkConnectButton connectionStatus={connectionStatus} onConnect={connect} />
     : <ConnectedEtherlinkAccount address={address}
       isSupportedNetwork={connectionStatus !== EtherlinkAccountConnectionStatus.SwitchNetwork}

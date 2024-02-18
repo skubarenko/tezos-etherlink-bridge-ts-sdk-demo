@@ -17,7 +17,7 @@ interface TezosAccountContextValue {
 }
 
 const initialValue: TezosAccountContextValue = {
-  connectionStatus: TezosAccountConnectionStatus.NotInstalled,
+  connectionStatus: TezosAccountConnectionStatus.NotConnected,
   address: undefined,
   connect: emptyAsyncFunction,
   disconnect: emptyAsyncFunction

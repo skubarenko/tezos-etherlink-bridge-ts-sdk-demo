@@ -1,144 +1,85 @@
 'use client';
 
-import {
-  createContext, useState, useContext, useEffect,
-  type ReactNode
-} from 'react';
+import { useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
+import { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
 
 import { useAppContext } from './useAppContext';
+import { config } from '@/config';
 import { EtherlinkAccountConnectionStatus } from '@/models';
 import { emptyAsyncFunction } from '@/utils';
 
 interface EtherlinkAccountContextValue {
   readonly connectionStatus: EtherlinkAccountConnectionStatus;
   readonly address: string | undefined;
-  readonly connect: () => Promise<string | undefined>;
+  readonly connect: () => Promise<void>;
   readonly switchNetwork: () => Promise<void>;
   readonly disconnect: () => Promise<void>;
 }
 
 const initialValue: EtherlinkAccountContextValue = {
-  connectionStatus: EtherlinkAccountConnectionStatus.NotInstalled,
+  connectionStatus: EtherlinkAccountConnectionStatus.NotConnected,
   address: undefined,
   connect: emptyAsyncFunction,
   switchNetwork: emptyAsyncFunction,
   disconnect: emptyAsyncFunction
 };
 
+const getConnectedStatus = (isConnected: boolean, currentChainId: number | undefined) => {
+  return isConnected
+    ? currentChainId === config.etherlink.network.chainId
+      ? EtherlinkAccountConnectionStatus.Connected
+      : EtherlinkAccountConnectionStatus.SwitchNetwork
+    : EtherlinkAccountConnectionStatus.NotConnected;
+};
+
 const EtherlinkAccountContext = createContext<EtherlinkAccountContextValue>(initialValue);
 
 export const EtherlinkAccountProvider = (props: { children: ReactNode }) => {
   const appContext = useAppContext();
+  const { address, chainId: currentChainId, isConnected } = useWeb3ModalAccount();
   const [currentValue, setCurrentValue] = useState<EtherlinkAccountContextValue>(initialValue);
-  const etherlinkWallet = appContext?.etherlinkWallet;
+  const { walletProvider } = useWeb3ModalProvider();
 
-  useEffect(() => {
-    setCurrentValue(etherlinkWallet
-      ? {
-        connectionStatus: EtherlinkAccountConnectionStatus.NotConnected,
-        address: undefined,
+  useEffect(
+    () => {
+      if (!appContext?.web3Modal)
+        return;
 
-        connect: async () => {
-          const [currentChainId, address] = await Promise.all([
-            etherlinkWallet.getCurrentChainId(),
-            etherlinkWallet.connectWallet()
-          ]);
-          const isValidChainId = currentChainId === etherlinkWallet.chainId;
-          setCurrentValue(previous => ({
-            ...previous,
-            connectionStatus: address
-              ? isValidChainId
-                ? EtherlinkAccountConnectionStatus.Connected
-                : EtherlinkAccountConnectionStatus.SwitchNetwork
-              : EtherlinkAccountConnectionStatus.NotConnected,
-            address,
-          }));
-
-          if (!isValidChainId) {
-            await etherlinkWallet.switchNetwork();
-          }
-
-          return address;
+      setCurrentValue({
+        address: initialValue.address,
+        connectionStatus: initialValue.connectionStatus,
+        async connect() {
+          await appContext.web3Modal.open();
         },
-        switchNetwork: async () => {
-          await etherlinkWallet.switchNetwork();
+        async switchNetwork() {
+          await appContext.web3Modal.switchNetwork(config.etherlink.network.chainId);
         },
-        disconnect: () => {
-          setCurrentValue(previous => ({
-            ...previous,
-            connectionStatus: EtherlinkAccountConnectionStatus.NotConnected,
-            address: undefined,
-          }));
-          return etherlinkWallet.disconnectWallet();
-        }
-      }
-      : initialValue);
-  }, [etherlinkWallet]);
+        async disconnect() {
+          await appContext.web3Modal.disconnect();
+        },
+      });
+    },
+    [appContext?.web3Modal]
+  );
 
-  useEffect(() => {
-    if (!etherlinkWallet)
-      return;
+  useEffect(
+    () => setCurrentValue(previous => ({
+      ...previous,
+      address,
+      connectionStatus: getConnectedStatus(isConnected, currentChainId),
+    })),
+    [address, currentChainId, isConnected]
+  );
 
-    const loadConnectedAccount = async () => {
-      try {
-        const [currentChainId, address] = await Promise.all([
-          etherlinkWallet.getCurrentChainId(),
-          etherlinkWallet.getCurrentConnectedAccount(),
-        ]);
+  useEffect(
+    () => {
+      if (!appContext?.etherlinkToolkit)
+        return;
 
-        setCurrentValue(previous => ({
-          ...previous,
-          connectionStatus: address
-            ? currentChainId === etherlinkWallet.chainId
-              ? EtherlinkAccountConnectionStatus.Connected
-              : EtherlinkAccountConnectionStatus.SwitchNetwork
-            : EtherlinkAccountConnectionStatus.NotConnected,
-          address,
-        }));
-      }
-      catch (error) {
-        console.error(error);
-      }
-    };
-
-    etherlinkWallet.addEventListener('chainChanged', chainId => {
-      const connectionStatus = chainId === etherlinkWallet.chainId
-        ? EtherlinkAccountConnectionStatus.Connected
-        : EtherlinkAccountConnectionStatus.SwitchNetwork;
-      setCurrentValue(previous => (previous.connectionStatus === connectionStatus
-        ? previous
-        : {
-          ...previous,
-          connectionStatus
-        })
-      );
-
-      console.log('Etherlink chain changed', chainId);
-    });
-
-    etherlinkWallet.addEventListener('accountsChanged', async accounts => {
-      const address = etherlinkWallet.getAccountToConnect(accounts);
-      const currentChainId = await etherlinkWallet.getCurrentChainId();
-      const connectionStatus = address
-        ? currentChainId === etherlinkWallet.chainId
-          ? EtherlinkAccountConnectionStatus.Connected
-          : EtherlinkAccountConnectionStatus.SwitchNetwork
-        : EtherlinkAccountConnectionStatus.NotConnected;
-
-      setCurrentValue(previous => !previous.address || (previous.address === address && previous.connectionStatus === connectionStatus)
-        ? previous
-        : ({
-          ...previous,
-          connectionStatus,
-          address,
-        })
-      );
-
-      console.log('Etherlink account changed', address, currentChainId);
-    });
-
-    loadConnectedAccount();
-  }, [etherlinkWallet]);
+      appContext.etherlinkToolkit.setProvider(walletProvider);
+    },
+    [appContext?.etherlinkToolkit, walletProvider]
+  );
 
   return <EtherlinkAccountContext.Provider value={currentValue}>
     {props.children}

@@ -9,15 +9,14 @@ export const enum TransferButtonDisallowedState {
   TokenTransferring = 2,
 
   TezosAccountNotConnected = 3,
-  EtherlinkWalletNotInstalled = 4,
-  EtherlinkAccountNotConnected = 5,
-  EtherlinkAccountInvalidNetwork = 6,
+  EtherlinkAccountNotConnected = 4,
+  EtherlinkAccountInvalidNetwork = 5,
 
-  ZeroAmount = 7,
-  NoTokens = 8,
-  ZeroTokenBalance = 9,
-  ZeroNativeTokenBalance = 10,
-  NotEnough = 11,
+  ZeroAmount = 6,
+  NoTokens = 7,
+  ZeroTokenBalance = 8,
+  ZeroNativeTokenBalance = 9,
+  NotEnough = 10,
 
   UnknownError = 100
 }
@@ -31,7 +30,6 @@ const classNameByDisallowedState = {
   [TransferButtonDisallowedState.Loading]: disabledButtonClassName,
   [TransferButtonDisallowedState.TokenTransferring]: disabledButtonClassName,
   [TransferButtonDisallowedState.TezosAccountNotConnected]: disabledButtonClassName,
-  [TransferButtonDisallowedState.EtherlinkWalletNotInstalled]: disabledButtonClassName,
   [TransferButtonDisallowedState.EtherlinkAccountNotConnected]: disabledButtonClassName,
   [TransferButtonDisallowedState.EtherlinkAccountInvalidNetwork]: disabledButtonClassName,
   [TransferButtonDisallowedState.ZeroAmount]: disabledButtonClassName,
@@ -47,9 +45,8 @@ const buttonTextMap = {
   [TransferButtonDisallowedState.Loading]: 'Loading...',
   [TransferButtonDisallowedState.TokenTransferring]: 'Transferring...',
   [TransferButtonDisallowedState.TezosAccountNotConnected]: 'Please connect Tezos account',
-  [TransferButtonDisallowedState.EtherlinkWalletNotInstalled]: 'Please install MetaMask wallet',
   [TransferButtonDisallowedState.EtherlinkAccountNotConnected]: 'Please connect Etherlink account',
-  [TransferButtonDisallowedState.EtherlinkAccountInvalidNetwork]: `Please switch to ${config.etherlink.networkName}`,
+  [TransferButtonDisallowedState.EtherlinkAccountInvalidNetwork]: `Please switch to ${config.etherlink.network.displayName}`,
   [TransferButtonDisallowedState.ZeroAmount]: 'Enter amount',
   [TransferButtonDisallowedState.NoTokens]: ['Select token to deposit', 'Select token to withdraw'],
   [TransferButtonDisallowedState.ZeroTokenBalance]: 'You have 0 tokens',

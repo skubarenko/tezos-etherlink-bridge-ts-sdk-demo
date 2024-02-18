@@ -11,7 +11,6 @@ const loadApp = async (): Promise<App | null> => {
 
     const appModule = await import('@/core/app');
     const app = new appModule.App();
-    await app.start();
 
     return app;
   }

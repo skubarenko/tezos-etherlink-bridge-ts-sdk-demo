@@ -66,15 +66,8 @@ export const EtherlinkConnectButton = (props: EtherlinkConnectButtonProps) => {
     [onConnect]
   );
 
-  const isDisabled = props.connectionStatus === EtherlinkAccountConnectionStatus.NotInstalled;
-  const text = props.connectionStatus === EtherlinkAccountConnectionStatus.AddNetwork
-    ? 'Add Etherlink Network'
-    : isDisabled
-      ? 'MetaMask Not Installed'
-      : 'Connect Etherlink Account';
-
-  return <ConnectButton isTezos={false} disabled={isDisabled} isLoading={isConnecting}
-    text={text} onConnect={handleButtonConnect}
+  return <ConnectButton isTezos={false} disabled={false} isLoading={isConnecting}
+    text="Connect Etherlink Account" onConnect={handleButtonConnect}
   />;
 };
 

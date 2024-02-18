@@ -45,7 +45,7 @@ export const NetworkMenuItem = (props: NetworkMenuItemProps) => {
     ? 'dark:text-orange-100 dark:bg-orange-700'
     : 'dark:text-green-100 dark:bg-green-700';
   const text = props.isSupportedNetwork
-    ? props.isTezos ? config.tezos.networkName : config.etherlink.networkName
+    ? props.isTezos ? config.tezos.network.displayName : config.etherlink.network.displayName
     : 'Unsupported Network';
 
   return <Menu.Item>
@@ -68,7 +68,7 @@ interface SwitchNetworkMenuItemProps {
 export const SwitchNetworkMenuItem = (props: SwitchNetworkMenuItemProps) => {
   return <MenuItem onClick={props.onSwitchNetwork}>
     <ArrowPathRoundedSquareIcon className="inline w-6 h-6 mr-1" />
-    <span>Switch to {config.etherlink.networkName}</span>
+    <span>Switch to {config.etherlink.network.displayName}</span>
   </MenuItem>;
 };
 

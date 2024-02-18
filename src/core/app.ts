@@ -7,43 +7,58 @@ import {
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { TezosToolkit, Signer } from '@taquito/taquito';
-import Web3, { type MetaMaskProvider, type Web3EthExecutionAPI } from 'web3';
+import { createWeb3Modal, defaultConfig } from '@web3modal/ethers';
+import { EthersStoreUtil } from '@web3modal/scaffold-utils/ethers';
+import Web3 from 'web3';
 
-import { TezosWalletSigner, MetaMaskEtherlinkWallet } from './wallets';
+import { TezosWalletSigner } from './wallets';
 import { config } from '@/config';
 import { BridgeDataProviderMock, TokenBridgeMock } from '@/mocks';
 import { tokenPairs } from '@/tokens';
 
 interface Window {
-  ethereum?: MetaMaskProvider<Web3EthExecutionAPI>;
   sdkLoggerProvider?: typeof sdkLoggerProvider;
+  app?: App;
 }
 
 export class App {
   readonly etherlinkToolkit: Web3;
+  readonly web3Modal: ReturnType<typeof createWeb3Modal>;
   readonly tezosToolkit: TezosToolkit;
   readonly beaconTezosWallet: BeaconWallet['client'];
   readonly tokenBridge: TokenBridge;
 
   private readonly beaconWallet: BeaconWallet;
   private readonly tezosWalletSigner: Signer;
-  private _etherlinkWallet: MetaMaskEtherlinkWallet | null;
 
   constructor() {
-    const metaMaskEthereumProvider: MetaMaskProvider<Web3EthExecutionAPI> | undefined = typeof window !== 'undefined'
-      ? (window as Window).ethereum
-      : undefined;
-    this.etherlinkToolkit = new Web3(metaMaskEthereumProvider);
-    this._etherlinkWallet = metaMaskEthereumProvider
-      ? new MetaMaskEtherlinkWallet(metaMaskEthereumProvider)
-      : null;
+    this.etherlinkToolkit = new Web3(EthersStoreUtil.state.provider);
+    this.web3Modal = createWeb3Modal({
+      ethersConfig: defaultConfig({
+        metadata: {
+          name: config.app.name,
+          description: config.app.description,
+          url: config.app.url,
+          icons: []
+        }
+      }),
+      chains: [{
+        chainId: config.etherlink.network.chainId,
+        name: config.etherlink.network.name,
+        currency: config.etherlink.network.nativeCurrency.symbol,
+        rpcUrl: config.etherlink.network.rpcUrl,
+        explorerUrl: config.etherlink.network.blockExplorerUrl,
+      }],
+      projectId: config.walletConnectProjectId,
+      enableAnalytics: false
+    });
 
-    this.tezosToolkit = new TezosToolkit(config.tezos.rpcUrl);
+    this.tezosToolkit = new TezosToolkit(config.tezos.network.rpcUrl);
     this.beaconWallet = new BeaconWallet({
-      name: config.appName,
+      name: config.app.name,
       network: {
         type: NetworkType.CUSTOM,
-        rpcUrl: config.tezos.rpcUrl
+        rpcUrl: config.tezos.network.rpcUrl
       },
       featuredWallets: ['temple', 'atomex', 'metamask', 'trust'],
       colorMode: ColorMode.DARK,
@@ -61,14 +76,14 @@ export class App {
         },
         tokenPairs,
         dipDup: {
-          baseUrl: config.dipDup.baseUrl,
-          webSocketApiBaseUrl: config.dipDup.webSocketApiBaseUrl,
+          baseUrl: config.providers.dipDup.baseUrl,
+          webSocketApiBaseUrl: config.providers.dipDup.webSocketApiBaseUrl,
         },
-        tzKTApiBaseUrl: config.tezos.tzktApiBaseUrl,
-        etherlinkRpcUrl: config.etherlink.rpcUrl,
+        tzKTApiBaseUrl: config.providers.tzKT.baseUrl,
+        etherlinkRpcUrl: config.etherlink.network.rpcUrl,
         tezos: {
           toolkit: this.tezosToolkit,
-          rollupAddress: config.tezos.smartRollupAddress,
+          rollupAddress: config.bridge.smartRollupAddress,
         },
         etherlink: {
           toolkit: this.etherlinkToolkit
@@ -77,43 +92,8 @@ export class App {
 
     if (typeof window !== 'undefined') {
       (window as Window).sdkLoggerProvider = sdkLoggerProvider;
+      (window as Window).app = this;
     }
-  }
-
-  get etherlinkWallet(): MetaMaskEtherlinkWallet | null {
-    return this._etherlinkWallet;
-  }
-
-  async start() {
-    if (!this.etherlinkWallet && typeof window !== 'undefined') {
-      const metaMaskEthereumProvider = await this.loadMetaMaskEthereumProvider(3000);
-      if (metaMaskEthereumProvider)
-        this._etherlinkWallet = new MetaMaskEtherlinkWallet(metaMaskEthereumProvider);
-    }
-  }
-
-  private loadMetaMaskEthereumProvider(timeout: number) {
-    return new Promise<MetaMaskProvider<Web3EthExecutionAPI> | undefined>((resolve, reject) => {
-      try {
-        window.addEventListener(
-          'ethereum#initialized',
-          () => {
-            resolve((window as Window).ethereum);
-          },
-          { once: true }
-        );
-
-        setTimeout(
-          () => {
-            resolve(undefined);
-          },
-          timeout
-        );
-      }
-      catch (error) {
-        reject(error);
-      }
-    });
   }
 
   private createTokenBridgeMock() {
@@ -124,7 +104,7 @@ export class App {
       tezos: {
         toolkit: this.tezosToolkit,
         bridgeOptions: {
-          rollupAddress: config.tezos.smartRollupAddress
+          rollupAddress: config.bridge.smartRollupAddress
         }
       },
       etherlink: {
