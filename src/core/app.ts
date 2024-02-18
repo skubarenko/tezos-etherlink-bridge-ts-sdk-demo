@@ -56,12 +56,16 @@ export class App {
     this.tezosToolkit = new TezosToolkit(config.tezos.network.rpcUrl);
     this.beaconWallet = new BeaconWallet({
       name: config.app.name,
+      description: config.app.description,
       network: {
         type: NetworkType.CUSTOM,
         rpcUrl: config.tezos.network.rpcUrl
       },
       featuredWallets: ['temple', 'atomex', 'metamask', 'trust'],
       colorMode: ColorMode.DARK,
+      walletConnectOptions: {
+        projectId: config.walletConnectProjectId
+      }
     });
     this.tezosWalletSigner = new TezosWalletSigner(this.beaconWallet);
     this.tezosToolkit.setWalletProvider(this.beaconWallet);
