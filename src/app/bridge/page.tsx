@@ -185,9 +185,6 @@ export default function Bridge() {
       tokenPairs={tokenPairs}
       tokenBalances={tokenBalances} />
     {lastError && <TransferError message={lastError} />}
-    {lastTokenTransfer && <div className="w-full max-w-xl">
-      <h2 className="text-2xl font-medium dark:text-gray-100">Last Transfer</h2>
-      <BridgeTransfer bridgeTokenTransfer={lastTokenTransfer} onFinishWithdrawing={handleFinishWithdrawing} />
-    </div>}
+    {lastTokenTransfer && <BridgeTransfer bridgeTokenTransfer={lastTokenTransfer} onFinishWithdrawing={handleFinishWithdrawing} />}
   </main>;
 }
