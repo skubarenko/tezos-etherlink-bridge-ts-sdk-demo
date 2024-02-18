@@ -3,6 +3,7 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import { ProgressPure, ProgressSegment } from './Progress';
 import { RollupDataLink, type RollupData } from './RollupDataLink';
 import { TransferError } from './TransferError';
+import { AddressAvatarPure } from '../AddressAvatar';
 import { ExplorerLinkPure } from '../ExplorerLink';
 import { ExternalLink } from '../ExternalLink';
 import { TokenPure } from '../Token';
@@ -80,6 +81,8 @@ interface TransferProps {
   amount: bigint;
   token: Token | null | undefined;
   status: TransferStatus;
+  sourceAddress: string;
+  receiverAddress: string;
   tezosOperationHash?: string;
   tezosOperationTimestamp?: string;
   etherlinkOperationHash?: string;
@@ -144,10 +147,20 @@ export const Transfer = (props: TransferProps) => {
     <div className="mt-6">
       <ProgressPure isDeposit={props.isDeposit} segments={segments} />
     </div>
+    <div className="flex justify-between items-center mt-2">
+      <div className="flex items-center">
+        <AddressAvatarPure address={props.sourceAddress} />
+        <ExplorerLinkPure type={LinkType.Address} value={props.sourceAddress} />
+      </div>
+      <div className="flex items-center">
+        <AddressAvatarPure address={props.receiverAddress} />
+        <ExplorerLinkPure type={LinkType.Address} value={props.receiverAddress} />
+      </div>
+    </div>
     <div className="flex justify-between items-center mt-4">
-      {firstOperationHash && <ExplorerLinkPure type={LinkType.Operation} value={firstOperationHash} />}
+      {firstOperationHash && <ExplorerLinkPure type={LinkType.Operation} value={firstOperationHash} displayShortFirstPart={8} displayShortLastPart={5} />}
       {lastOperationHash
-        ? <ExplorerLinkPure type={LinkType.Operation} value={lastOperationHash} />
+        ? <ExplorerLinkPure type={LinkType.Operation} value={lastOperationHash} displayShortFirstPart={8} displayShortLastPart={5} />
         : <RollupDataLink rollupData={props.rollupData} />
       }
     </div>
