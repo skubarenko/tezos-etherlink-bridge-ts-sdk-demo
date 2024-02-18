@@ -1,7 +1,8 @@
 import { NetworkType, ColorMode } from '@airgap/beacon-types';
 import {
+  loggerProvider as sdkLoggerProvider, LogLevel,
   createDefaultTokenBridge, defaultEtherlinkKernelAddress, defaultEtherlinkWithdrawPrecompileAddress,
-  LocalTokensBridgeDataProvider, LogLevel,
+  LocalTokensBridgeDataProvider,
   type TokenBridge
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
@@ -15,6 +16,7 @@ import { tokenPairs } from '@/tokens';
 
 interface Window {
   ethereum?: MetaMaskProvider<Web3EthExecutionAPI>;
+  sdkLoggerProvider?: typeof sdkLoggerProvider;
 }
 
 export class App {
@@ -72,6 +74,10 @@ export class App {
           toolkit: this.etherlinkToolkit
         }
       });
+
+    if (typeof window !== 'undefined') {
+      (window as Window).sdkLoggerProvider = sdkLoggerProvider;
+    }
   }
 
   get etherlinkWallet(): MetaMaskEtherlinkWallet | null {
