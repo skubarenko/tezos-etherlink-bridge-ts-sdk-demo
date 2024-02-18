@@ -1,6 +1,5 @@
 'use client';
 
-import { AbortedBeaconError } from '@airgap/beacon-core';
 import {
   BridgeTokenTransferStatus,
   utils as bridgeUtils,
@@ -16,7 +15,7 @@ import { BridgeTransfer } from '@/components/Transfer';
 import { useAppContext, useEtherlinkAccount, useTezosAccount, useTokenTransfersStoreContext } from '@/hooks';
 import type { Token } from '@/models';
 import { findTokenByInfo, tokenPairs, tokens } from '@/tokens';
-import { getErrorMessage, tokenUtils } from '@/utils';
+import { getErrorMessage, tokenUtils, walletUtils } from '@/utils';
 
 const getActualTokenTransferStateValue = (newTokenTransfer: BridgeTokenTransfer) => (previousTokenTransfer: BridgeTokenTransfer | undefined) => {
   return previousTokenTransfer && bridgeUtils.getInitialOperationHash(previousTokenTransfer) === bridgeUtils.getInitialOperationHash(newTokenTransfer)
@@ -124,7 +123,7 @@ export default function Bridge() {
         tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
-        if (error instanceof AbortedBeaconError)
+        if (walletUtils.isUserAbortedWalletError(error))
           return;
 
         setLastTokenTransfer(undefined);
@@ -156,6 +155,9 @@ export default function Bridge() {
         tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
+        if (walletUtils.isUserAbortedWalletError(error))
+          return;
+
         setLastTokenTransfer(undefined);
         setLastError(getErrorMessage(error));
       }

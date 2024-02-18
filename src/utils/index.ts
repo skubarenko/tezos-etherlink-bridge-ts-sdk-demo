@@ -2,6 +2,7 @@ export * as guards from './guards';
 export * as tokenUtils from './tokenUtils';
 export * as textUtils from './textUtils';
 export * as blockchainUtils from './blockchainUtils';
+export * as walletUtils from './walletUtils';
 
 import combineClassNames from 'clsx';
 export { combineClassNames };
