@@ -8,6 +8,7 @@ import { emptyFunction } from '@/utils';
 interface ConnectButtonProps {
   isTezos: boolean;
   text: string;
+  smallText: string;
   disabled: boolean;
   isLoading?: boolean;
 
@@ -28,10 +29,17 @@ const ConnectButton = (props: ConnectButtonProps) => {
     {props.isLoading
       ? <span className="flex items-center">
         <SpinIcon className="animate-spin h-5 w-5 my-0.5 mr-2 text-white" />
-        {props.text}
+        <span className="hidden md:inline">{props.text}</span>
+        <span className="md:hidden">{props.smallText}</span>
       </span>
-      :
-      <Blockchain isTezos={props.isTezos} name={props.text} />
+      : <>
+        <div className="hidden md:inline">
+          <Blockchain isTezos={props.isTezos} name={props.text} />
+        </div>
+        <div className="md:hidden">
+          <Blockchain isTezos={props.isTezos} name={props.smallText} />
+        </div>
+      </>
     }
   </button>;
 };
@@ -43,6 +51,7 @@ interface TezosConnectButtonProps {
 export const TezosConnectButton = (props: TezosConnectButtonProps) => {
   return <ConnectButton isTezos={true} disabled={false}
     text="Connect Tezos Account"
+    smallText="Connect Tezos"
     onConnect={props.onConnect}
   />;
 };
@@ -67,7 +76,9 @@ export const EtherlinkConnectButton = (props: EtherlinkConnectButtonProps) => {
   );
 
   return <ConnectButton isTezos={false} disabled={false} isLoading={isConnecting}
-    text="Connect Etherlink Account" onConnect={handleButtonConnect}
+    text="Connect Etherlink Account"
+    smallText="Connect Etherlink"
+    onConnect={handleButtonConnect}
   />;
 };
 

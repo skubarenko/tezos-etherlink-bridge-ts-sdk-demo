@@ -19,7 +19,7 @@ export const Transfer = (props: TransferProps) => {
       <div className="flex w-full justify-between items-center mb-2">
         {props.children}
       </div>
-      <div className="text-sm text-gray-300">Balance: {props.balance}</div>
+      <div className="text-sm text-gray-300 max-w-full overflow-hidden overflow-ellipsis">Balance: {props.balance}</div>
     </div>
   </div>;
 };

@@ -18,8 +18,8 @@ const TokensListItem = (props: TokensListItemProps) => {
     hover:cursor-pointer
   dark:hover:bg-slate-800"
   >
-    <TokenPure className="width" token={props.token} showName={true} />
-    <span className="text-left overflow-hidden overflow-ellipsis">{tokenBalance}</span>
+    <TokenPure token={props.token} showName={true} />
+    <span className="ml-2 text-left overflow-hidden overflow-ellipsis">{tokenBalance}</span>
   </Listbox.Option>;
 };
 const TokensListItemPure = memo(TokensListItem);
@@ -60,7 +60,7 @@ export const TokensList = (props: TokensListProps) => {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Listbox.Options className="absolute right-0 w-96 max-w-96 mt-2 origin-top-right rounded-lg
+        <Listbox.Options className="absolute right-0 w-max mt-2 min-w-72 max-w-72 sm:max-w-96 origin-top-right rounded-lg
            border border-solid
            dark:bg-slate-700 dark:border-slate-500"
         >

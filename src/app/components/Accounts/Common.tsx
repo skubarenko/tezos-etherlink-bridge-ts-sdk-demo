@@ -125,9 +125,9 @@ interface AccountMenuBaseProps {
 
 export const AccountMenuBase = (props: AccountMenuBaseProps) => {
   const menuButtonText = textUtils.getShortText(props.address, 6, 4);
-  return <Menu as="div" className="relative inline-block text-base text-left">
+  return <Menu as="div" className="ml-2 first:ml-0 relative inline-block text-base text-left">
     <Menu.Button as="button" disabled={props.isSwitchingNetwork}
-      className="flex justify-center items-center ml-2 p-2 rounded-lg
+      className="flex justify-center items-center p-2 rounded-lg
         font-mono select-none cursor-pointer
         dark:text-gray-100 dark:bg-slate-600 dark:hover:bg-slate-700"
     >
@@ -149,7 +149,7 @@ export const AccountMenuBase = (props: AccountMenuBaseProps) => {
       leaveFrom="transform opacity-100 scale-100"
       leaveTo="transform opacity-0 scale-95"
     >
-      <Menu.Items className="absolute right-0 max-w-60  mt-2 origin-top-right rounded-lg
+      <Menu.Items className="absolute right-0 max-w-60 mt-2 origin-top-right rounded-lg
         border border-solid
       dark:bg-slate-700 dark:border-slate-500"
       >

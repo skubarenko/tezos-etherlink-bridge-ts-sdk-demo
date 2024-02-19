@@ -16,6 +16,11 @@ const config: Config = {
       },
       animation: {
         progress: 'pulse 1.7s cubic-bezier(0.4, 0, 0.6, 1) infinite;'
+      },
+      screens: {
+        xsm: '400px',
+        sm: '668px',
+        md: '800px'
       }
     },
   },

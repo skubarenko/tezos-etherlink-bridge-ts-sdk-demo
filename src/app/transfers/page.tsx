@@ -45,8 +45,10 @@ export default function Transfers() {
 
   useEffect(
     () => {
-      if (!tokenBridge || !(tezosAccount || etherlinkAccount))
+      if (!tokenBridge || !(tezosAccount || etherlinkAccount)) {
+        setIsTransfersLoading(false);
         return;
+      }
 
       const accounts = tezosAccount && etherlinkAccount
         ? [tezosAccount, etherlinkAccount]
@@ -87,7 +89,7 @@ export default function Transfers() {
     [tokenBridge]
   );
 
-  return <main className="flex flex-col items-center pt-6">
+  return <main className="flex flex-col items-center md:mt-6">
     {isTransfersLoading || !tokenTransfers.length
       ? <div className="flex items-center text-lg mt-10">
         {isTransfersLoading

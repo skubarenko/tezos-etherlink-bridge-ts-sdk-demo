@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BridgePure } from './Bridge';
 import { TransferError } from './TransferError';
 import { BridgeTransfer } from '@/components/Transfer';
-import { useAppContext, useEtherlinkAccount, useTezosAccount, useTokenTransfersStoreContext } from '@/hooks';
+import { useAppContext, useEtherlinkAccount, useIsomorphicLayoutEffect, useTezosAccount, useTokenTransfersStoreContext } from '@/hooks';
 import type { Token } from '@/models';
 import { findTokenByInfo, tokenPairs, tokens } from '@/tokens';
 import { getErrorMessage, tokenUtils, walletUtils } from '@/utils';
@@ -60,14 +60,25 @@ export default function Bridge() {
   const { dispatch: tokenTransfersStoreDispatch } = useTokenTransfersStoreContext();
   const tokenBridge = app?.tokenBridge;
 
-  useEffect(() => {
-    if (!tokenBridge)
-      return;
+  useEffect(
+    () => {
+      if (!tokenBridge)
+        return;
 
-    loadBalances(tokenBridge, tezosAccountAddress, etherlinkAccountAddress)
-      .then(tokenBalances => setTokenBalances(tokenBalances));
-  },
+      loadBalances(tokenBridge, tezosAccountAddress, etherlinkAccountAddress)
+        .then(tokenBalances => setTokenBalances(tokenBalances));
+    },
     [etherlinkAccountAddress, tezosAccountAddress, tokenBridge]
+  );
+
+  useIsomorphicLayoutEffect(
+    () => {
+      if (!lastTokenTransfer && !lastError)
+        return;
+
+      window.scrollTo(0, document.body.scrollHeight);
+    },
+    [lastTokenTransfer, lastError]
   );
 
   const handleTokenTransferUpdated = useCallback(
@@ -176,7 +187,7 @@ export default function Bridge() {
     [tokenBridge]
   );
 
-  return <main className="flex flex-col justify-center items-center pt-6">
+  return <main className="flex flex-col justify-center items-center md:mt-6">
     <BridgePure isLoading={!!tokenBridge}
       tezosAccountConnectionStatus={tezosConnectionStatus}
       etherlinkAccountConnectionStatus={etherlinkConnectionStatus}

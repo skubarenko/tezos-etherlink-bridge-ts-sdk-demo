@@ -33,7 +33,9 @@ export default function RootLayout({
               <TokenTransfersStoreContextProvider>
                 <>
                   <Header />
-                  {children}
+                  <div className="px-4">
+                    {children}
+                  </div>
                 </>
               </TokenTransfersStoreContextProvider>
             </TezosAccountProvider>
