@@ -40,7 +40,7 @@ export const config = {
       webSocketApiBaseUrl: 'wss://etherlink-bridge-indexer.dipdup.net'
     },
     tzKT: {
-      baseUrl: 'https://api.oxfordnet.tzkt.io',
+      baseUrl: `https://api.${tezosNetworkName}.tzkt.io`,
     }
   },
   walletConnectProjectId: '734c08921b9f4f202d6b63a45fb0d800',
