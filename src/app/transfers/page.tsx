@@ -47,6 +47,7 @@ export default function Transfers() {
     () => {
       if (!tokenBridge || !(tezosAccount || etherlinkAccount)) {
         setIsTransfersLoading(false);
+        tokenTransfersDispatch({ type: 'cleared' });
         return;
       }
 

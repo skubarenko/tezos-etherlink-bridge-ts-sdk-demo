@@ -13,7 +13,8 @@ type TokenTransfersStore = {
 
 type TokenTransfersStoreAction =
   | { type: 'loaded', payload: readonly BridgeTokenTransfer[] }
-  | { type: 'added-or-updated', payload: BridgeTokenTransfer };
+  | { type: 'added-or-updated', payload: BridgeTokenTransfer }
+  | { type: 'cleared' };
 
 const tokenTransfersReducer = (state: ReadonlyMap<string, BridgeTokenTransfer>, action: TokenTransfersStoreAction) => {
   switch (action.type) {
@@ -27,6 +28,8 @@ const tokenTransfersReducer = (state: ReadonlyMap<string, BridgeTokenTransfer>, 
       newState.set(bridgeUtils.getInitialOperationHash(action.payload), action.payload);
       return newState;
     }
+    case 'cleared':
+      return new Map();
   }
 };
 
