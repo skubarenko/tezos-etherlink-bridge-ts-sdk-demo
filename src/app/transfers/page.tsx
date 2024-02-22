@@ -35,12 +35,8 @@ export default function Transfers() {
       console.log('Token Transfer Created or Updated', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
 
       tokenTransfersDispatch({ type: 'added-or-updated', payload: tokenTransfer });
-      if (tokenTransfer.status === BridgeTokenTransferStatus.Finished) {
-        console.log(`Unsubscribe from the ${initialOperationHash} token transfer`);
-        tokenBridge?.stream.unsubscribeFromTokenTransfer(tokenTransfer);
-      }
     },
-    [tokenBridge, tokenTransfersDispatch]
+    [tokenTransfersDispatch]
   );
 
   useEffect(
@@ -59,11 +55,6 @@ export default function Transfers() {
         const tokenTransfers = await tokenBridge.data.getAccountTokenTransfers(accounts);
         tokenTransfersDispatch({ type: 'loaded', payload: tokenTransfers });
         setIsTransfersLoading(false);
-
-        tokenTransfers.forEach(t => {
-          if (t.status !== BridgeTokenTransferStatus.Finished)
-            tokenBridge.stream.subscribeToTokenTransfer(t);
-        });
       };
 
       tokenBridge.addEventListener('tokenTransferCreated', handleTokenTransferCreatedOrUpdated);
