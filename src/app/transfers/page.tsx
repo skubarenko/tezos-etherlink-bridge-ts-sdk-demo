@@ -29,10 +29,10 @@ export default function Transfers() {
     [tokenTransfersMap]
   );
 
-  const handleTokenTransferUpdated = useCallback(
+  const handleTokenTransferCreatedOrUpdated = useCallback(
     (tokenTransfer: BridgeTokenTransfer) => {
       const initialOperationHash = bridgeUtils.getInitialOperationHash(tokenTransfer);
-      console.log('Token Transfer Updated', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
+      console.log('Token Transfer Created or Updated', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
 
       tokenTransfersDispatch({ type: 'added-or-updated', payload: tokenTransfer });
       if (tokenTransfer.status === BridgeTokenTransferStatus.Finished) {
@@ -66,17 +66,19 @@ export default function Transfers() {
         });
       };
 
-      tokenBridge.addEventListener('tokenTransferUpdated', handleTokenTransferUpdated);
+      tokenBridge.addEventListener('tokenTransferCreated', handleTokenTransferCreatedOrUpdated);
+      tokenBridge.addEventListener('tokenTransferUpdated', handleTokenTransferCreatedOrUpdated);
       setIsTransfersLoading(true);
       loadTokenTransfers();
       tokenBridge.stream.subscribeToAccountTokenTransfers(accounts);
 
       return () => {
-        tokenBridge.removeEventListener('tokenTransferUpdated', handleTokenTransferUpdated);
+        tokenBridge.removeEventListener('tokenTransferCreated', handleTokenTransferCreatedOrUpdated);
+        tokenBridge.removeEventListener('tokenTransferUpdated', handleTokenTransferCreatedOrUpdated);
         tokenBridge.stream.unsubscribeFromAllSubscriptions();
       };
     },
-    [tokenBridge, tezosAccount, etherlinkAccount, tokenTransfersDispatch, handleTokenTransferUpdated]
+    [tokenBridge, tezosAccount, etherlinkAccount, tokenTransfersDispatch, handleTokenTransferCreatedOrUpdated]
   );
 
   const handleFinishWithdrawing = useCallback(
