@@ -7,7 +7,7 @@ import {
   AppContextProvider,
   EtherlinkAccountProvider,
   TezosAccountProvider,
-  TokenTransfersStoreContextProvider
+  LocalTokenTransfersStoreContextProvider
 } from '@/hooks';
 import './globals.css';
 
@@ -30,14 +30,14 @@ export default function RootLayout({
         <AppContextProvider>
           <EtherlinkAccountProvider>
             <TezosAccountProvider>
-              <TokenTransfersStoreContextProvider>
+              <LocalTokenTransfersStoreContextProvider>
                 <>
                   <Header />
                   <div className="px-4">
                     {children}
                   </div>
                 </>
-              </TokenTransfersStoreContextProvider>
+              </LocalTokenTransfersStoreContextProvider>
             </TezosAccountProvider>
           </EtherlinkAccountProvider>
         </AppContextProvider>

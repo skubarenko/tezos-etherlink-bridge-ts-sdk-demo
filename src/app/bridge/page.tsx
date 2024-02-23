@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BridgePure } from './Bridge';
 import { TransferError } from './TransferError';
 import { BridgeTransfer } from '@/components/Transfer';
-import { useAppContext, useEtherlinkAccount, useIsomorphicLayoutEffect, useTezosAccount, useTokenTransfersStoreContext } from '@/hooks';
+import { useAppContext, useEtherlinkAccount, useIsomorphicLayoutEffect, useTezosAccount, useLocalTokenTransfersStoreContext } from '@/hooks';
 import type { Token } from '@/models';
 import { findTokenByInfo, tokenPairs, tokens } from '@/tokens';
 import { getErrorMessage, tokenUtils, walletUtils } from '@/utils';
@@ -57,7 +57,7 @@ export default function Bridge() {
   const { connectionStatus: etherlinkConnectionStatus, address: etherlinkAccountAddress } = useEtherlinkAccount();
   const { connectionStatus: tezosConnectionStatus, address: tezosAccountAddress } = useTezosAccount();
   const app = useAppContext();
-  const { dispatch: tokenTransfersStoreDispatch } = useTokenTransfersStoreContext();
+  const { dispatch: tokenTransfersStoreDispatch } = useLocalTokenTransfersStoreContext();
   const tokenBridge = app?.tokenBridge;
 
   useEffect(
@@ -130,7 +130,7 @@ export default function Bridge() {
 
         const { tokenTransfer } = await tokenBridge.deposit(amount, token);
         setLastTokenTransfer(tokenTransfer);
-        tokenTransfersStoreDispatch({ type: 'added-or-updated', payload: tokenTransfer });
+        tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
         tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
@@ -162,7 +162,7 @@ export default function Bridge() {
 
         const { tokenTransfer } = await tokenBridge.startWithdraw(amount, token);
         setLastTokenTransfer(tokenTransfer);
-        tokenTransfersStoreDispatch({ type: 'added-or-updated', payload: tokenTransfer });
+        tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
         tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
       }
       catch (error) {
@@ -182,7 +182,7 @@ export default function Bridge() {
         return;
 
       const result = await tokenBridge.finishWithdraw(sealedWithdrawal);
-      await result.finishWithdrawOperation.confirmation();
+      await tokenBridge.waitForStatus(result.tokenTransfer, BridgeTokenTransferStatus.Finished);
     },
     [tokenBridge]
   );
