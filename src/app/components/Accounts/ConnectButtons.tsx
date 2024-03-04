@@ -21,7 +21,7 @@ const disabledButtonStyleClassName = ' dark:text-gray-100 dark:bg-slate-600 opac
 const ConnectButton = (props: ConnectButtonProps) => {
   const isDisabled = props.isLoading || props.disabled;
 
-  return <button className={`flex justify-center items-center ml-2 p-2 rounded-lg text-sm font-medium select-none
+  return <button className={`flex justify-center items-center ml-2 first:ml-0 p-2 rounded-lg text-sm font-medium select-none
     ${isDisabled ? disabledButtonStyleClassName : enabledButtonStyleClassName}`}
     disabled={isDisabled}
     onClick={props.onConnect}
@@ -81,4 +81,3 @@ export const EtherlinkConnectButton = (props: EtherlinkConnectButtonProps) => {
     onConnect={handleButtonConnect}
   />;
 };
-

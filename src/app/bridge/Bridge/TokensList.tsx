@@ -70,4 +70,5 @@ export const TokensList = (props: TokensListProps) => {
     </Listbox>
     : <EmptyTokensList />);
 };
+
 export const TokensListPure = memo(TokensList);
