@@ -85,7 +85,7 @@ export default function Transfers() {
 
         setIsTransfersLoading(true);
         loadingState.current = TokenTransfersLoadingState.Loading;
-        const tokenTransfers = await tokenBridge.data.getAccountTokenTransfers(accounts, offsetRef.current, tokenTransfersLimit);
+        const tokenTransfers = await tokenBridge.data.getAccountTokenTransfers(accounts, { offset: offsetRef.current, limit: tokenTransfersLimit });
         dispatchToTokenTransfersStore({ type: 'loaded', payload: tokenTransfers });
         setIsTransfersLoading(false);
         loadingState.current = tokenTransfers.length ? TokenTransfersLoadingState.Ready : TokenTransfersLoadingState.AllTransfersLoaded;

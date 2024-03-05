@@ -1,28 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   TokenBridge,
-  type TezosToken, type TokenBridgeOptions, type NonNativeEtherlinkToken, type SealedBridgeTokenWithdrawal
+  type TokenBridgeOptions, type TezosToken, type EtherlinkToken, type SealedBridgeTokenWithdrawal,
+  type TaquitoWalletTezosBridgeBlockchainService, type Web3EtherlinkBridgeBlockchainService,
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
 
 import type { BridgeDataProviderMock } from './bridgeDataProviderMock';
 
-interface TokenBridgeMockOptions extends TokenBridgeOptions {
+interface TokenBridgeMockOptions extends TokenBridgeOptions<TaquitoWalletTezosBridgeBlockchainService, Web3EtherlinkBridgeBlockchainService> {
   bridgeDataProviders: TokenBridgeOptions['bridgeDataProviders'] & {
     balances: BridgeDataProviderMock,
     transfers: BridgeDataProviderMock
   }
 }
 
-export class TokenBridgeMock extends TokenBridge {
+export class TokenBridgeMock extends TokenBridge<TaquitoWalletTezosBridgeBlockchainService, Web3EtherlinkBridgeBlockchainService> {
   constructor(readonly options: TokenBridgeMockOptions) {
     super(options);
   }
 
   async deposit(amount: bigint, token: TezosToken, etherlinkReceiverAddressOrOptions?: any, _options?: any): Promise<any> {
-    const source = await this.getTezosConnectedAddress();
+    const source = await this.getTezosSignerAddress();
     const receiver = typeof etherlinkReceiverAddressOrOptions === 'string'
       ? etherlinkReceiverAddressOrOptions
-      : await this.getEtherlinkConnectedAddress();
+      : await this.getEtherlinkSignerAddress();
+
+    if (!source)
+      throw new Error('The Tezos signer address is unavailable');
+    if (!receiver)
+      throw new Error('The Etherlink receiver address is undefined');
 
     const tokenTransfer = await this.options.bridgeDataProviders.transfers.deposit(amount, token, source, receiver);
     return {
@@ -30,11 +36,16 @@ export class TokenBridgeMock extends TokenBridge {
     };
   }
 
-  async startWithdraw(amount: bigint, token: NonNativeEtherlinkToken, tezosReceiverAddress?: string): Promise<any> {
-    const source = await this.getEtherlinkConnectedAddress();
+  async startWithdraw(amount: bigint, token: EtherlinkToken, tezosReceiverAddress?: string): Promise<any> {
+    const source = await this.getEtherlinkSignerAddress();
     const receiver = typeof tezosReceiverAddress === 'string'
       ? tezosReceiverAddress
-      : await this.getTezosConnectedAddress();
+      : await this.getTezosSignerAddress();
+
+    if (!source)
+      throw new Error('The Etherlink signer address is unavailable');
+    if (!receiver)
+      throw new Error('The Tezos receiver address is undefined');
 
     const tokenTransfer = await this.options.bridgeDataProviders.transfers.startWithdraw(amount, token, source, receiver);
     return {

@@ -4,7 +4,8 @@ import {
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
 import { useCallback, useEffect, useState } from 'react';
 
-import { Transfer, TransferStatus } from './Transfer';
+import { Transfer } from './Transfer';
+import { TransferStatus } from './transferStatus';
 import { findTokenByInfo } from '@/tokens';
 import { getErrorMessage, walletUtils } from '@/utils';
 
@@ -24,13 +25,15 @@ const statusesMap = {
 export const BridgeTransfer = ({ bridgeTokenTransfer, onFinishWithdrawing }: BridgeTransferProps) => {
   const isDeposit = bridgeTokenTransfer.kind === BridgeTokenTransferKind.Deposit;
   const initialOperation = isDeposit ? bridgeTokenTransfer.tezosOperation : bridgeTokenTransfer.etherlinkOperation;
-  const [currentError, setCurrentError] = useState<string>();
-
+  const rollupData = bridgeTokenTransfer.status === BridgeTokenTransferStatus.Sealed ? bridgeTokenTransfer.rollupData : undefined;
+  const estimatedNextStatusTimestamp = !isDeposit && bridgeTokenTransfer.status === BridgeTokenTransferStatus.Created
+    ? bridgeTokenTransfer.rollupData.estimatedOutboxMessageExecutionTimestamp
+    : undefined;
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const tezosOperation: FinishedBridgeTokenDeposit['tezosOperation'] | undefined = (bridgeTokenTransfer as any).tezosOperation;
   const etherlinkOperation: FinishedBridgeTokenDeposit['etherlinkOperation'] | undefined = (bridgeTokenTransfer as any).etherlinkOperation;
-  const rollupData = bridgeTokenTransfer.status === BridgeTokenTransferStatus.Sealed ? bridgeTokenTransfer.rollupData : undefined;
   /* eslint-enable @typescript-eslint/no-explicit-any */
+  const [currentError, setCurrentError] = useState<string>();
 
   useEffect(() => setCurrentError(undefined), [bridgeTokenTransfer.status]);
 
@@ -61,6 +64,7 @@ export const BridgeTransfer = ({ bridgeTokenTransfer, onFinishWithdrawing }: Bri
     etherlinkOperationHash={etherlinkOperation?.hash}
     etherlinkOperationTimestamp={etherlinkOperation?.timestamp}
     rollupData={rollupData}
+    estimatedNextStatusTimestamp={estimatedNextStatusTimestamp}
     error={currentError}
     onFinishWithdrawing={handleFinishWithdrawing}
   />;

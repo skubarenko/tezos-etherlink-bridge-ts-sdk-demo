@@ -135,16 +135,30 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
   unsubscribeFromAllSubscriptions(): void {
   }
 
-  getBalance(_accountAddress: string, _token: TezosToken | EtherlinkToken): Promise<AccountTokenBalance> {
-    throw new Error('Method not implemented.');
+  async getBalance(accountAddress: string, token: TezosToken | EtherlinkToken): Promise<AccountTokenBalance> {
+    return {
+      address: accountAddress,
+      token,
+      balance: 1_000_000n
+    };
   }
 
-  getBalances(accountAddress: string): Promise<AccountTokenBalances>;
-  getBalances(accountAddress: string, tokens: ReadonlyArray<TezosToken | EtherlinkToken>): Promise<AccountTokenBalances>;
-  getBalances(accountAddress: string, offset: number, limit: number): Promise<AccountTokenBalances>;
-  getBalances(accountAddress: string, tokensOrOffset?: number | ReadonlyArray<TezosToken | EtherlinkToken> | undefined, limit?: number | undefined): Promise<AccountTokenBalances>;
-  getBalances(_accountAddress: unknown, _tokensOrOffset?: unknown, _limit?: unknown): Promise<AccountTokenBalances> {
-    throw new Error('Method not implemented.');
+  async getBalances(accountAddress: string): Promise<AccountTokenBalances>;
+  async getBalances(accountAddress: string, tokens: ReadonlyArray<TezosToken | EtherlinkToken>): Promise<AccountTokenBalances>;
+  async getBalances(accountAddress: string, offset: number, limit: number): Promise<AccountTokenBalances>;
+  async getBalances(accountAddress: string, tokensOrOffset?: number | ReadonlyArray<TezosToken | EtherlinkToken> | undefined, limit?: number | undefined): Promise<AccountTokenBalances>;
+  async getBalances(accountAddress: string, tokensOrOffset?: ReadonlyArray<TezosToken | EtherlinkToken> | number, _limit?: number): Promise<AccountTokenBalances> {
+    const tokens = typeof tokensOrOffset === 'number' || !tokensOrOffset
+      ? (await this.tokensProvider.getRegisteredTokenPairs()).flatMap(pair => [pair.tezos, pair.etherlink])
+      : tokensOrOffset;
+
+    return {
+      address: accountAddress,
+      tokenBalances: tokens.map(token => ({
+        token,
+        balance: 1_000_000n
+      }))
+    };
   }
 
   async deposit(amount: bigint, token: TezosToken, source: string, receiver: string): Promise<PendingBridgeTokenDeposit> {

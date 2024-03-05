@@ -1,8 +1,10 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 
+import { EstimatedTimePure } from './EstimatedTime';
 import { ProgressPure, ProgressSegment } from './Progress';
 import { RollupDataLink, type RollupData } from './RollupDataLink';
 import { TransferError } from './TransferError';
+import { TransferStatus } from './transferStatus';
 import { AddressAvatarPure } from '../AddressAvatar';
 import { ExplorerLinkPure } from '../ExplorerLink';
 import { ExternalLink } from '../ExternalLink';
@@ -11,14 +13,6 @@ import { SpinIcon } from '../icons';
 import type { Token } from '@/models';
 import { blockchainUtils, emptyFunction, tokenUtils } from '@/utils';
 import { LinkType } from '@/utils/blockchainUtils';
-
-export const enum TransferStatus {
-  Pending = 0,
-  Created = 1,
-  Sealed = 2,
-  Finished = 3,
-  Failed = 4
-}
 
 const inProgressSegment: ProgressSegment = {
   backgroundColorCssClass: 'dark:bg-cyan-500',
@@ -88,6 +82,7 @@ interface TransferProps {
   etherlinkOperationHash?: string;
   etherlinkOperationTimestamp?: string;
   rollupData?: RollupData;
+  estimatedNextStatusTimestamp?: string;
   error?: string;
 
   onFinishWithdrawing: () => Promise<void>;
@@ -164,9 +159,17 @@ export const Transfer = (props: TransferProps) => {
         : <RollupDataLink rollupData={props.rollupData} />
       }
     </div>
-    <div className="flex justify-between items-center mt-1 text-xs">
+    <div className="flex justify-between items-center mt-1 text-sm">
       {firstOperationTimestamp && <span>{new Date(firstOperationTimestamp).toLocaleString()}</span>}
-      {lastOperationTimestamp && <span>{new Date(lastOperationTimestamp).toLocaleString()}</span>}
+      {lastOperationTimestamp
+        ? <span>{new Date(lastOperationTimestamp).toLocaleString()}</span>
+        : props.estimatedNextStatusTimestamp && <EstimatedTimePure
+          isDeposit={props.isDeposit}
+          status={props.status}
+          estimatedNextStatusTimestamp={props.estimatedNextStatusTimestamp}
+          className="text-right"
+        />
+      }
     </div>
     {props.status === TransferStatus.Sealed && <div className="flex justify-center items-center">
       <button className="w-full mt-4 h-12 rounded-lg select-none cursor-pointer 
