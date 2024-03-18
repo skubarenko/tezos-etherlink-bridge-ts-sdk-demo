@@ -18,7 +18,7 @@ import { findTokenByInfo, tokenPairs, tokens } from '@/tokens';
 import { getErrorMessage, tokenUtils, walletUtils } from '@/utils';
 
 const getActualTokenTransferStateValue = (newTokenTransfer: BridgeTokenTransfer) => (previousTokenTransfer: BridgeTokenTransfer | undefined) => {
-  return previousTokenTransfer && bridgeUtils.getInitialOperationHash(previousTokenTransfer) === bridgeUtils.getInitialOperationHash(newTokenTransfer)
+  return previousTokenTransfer && bridgeUtils.getInitialOperation(previousTokenTransfer).hash === bridgeUtils.getInitialOperation(newTokenTransfer).hash
     ? newTokenTransfer
     : previousTokenTransfer;
 };
@@ -83,7 +83,7 @@ export default function Bridge() {
 
   const handleTokenTransferUpdated = useCallback(
     (tokenTransfer: BridgeTokenTransfer) => {
-      const initialOperationHash = bridgeUtils.getInitialOperationHash(tokenTransfer);
+      const initialOperationHash = bridgeUtils.getInitialOperation(tokenTransfer).hash;
       console.log('Token Transfer Updated', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
 
       setLastTokenTransfer(getActualTokenTransferStateValue(tokenTransfer));
@@ -94,7 +94,7 @@ export default function Bridge() {
 
       if (tokenTransfer.status === BridgeTokenTransferStatus.Finished) {
         console.log(`Unsubscribe from the ${initialOperationHash} token transfer`);
-        tokenBridge?.stream.unsubscribeFromTokenTransfer(tokenTransfer);
+        tokenBridge?.stream.unsubscribeFromOperationTokenTransfers(tokenTransfer);
       }
     },
     [tokenBridge, etherlinkAccountAddress, tezosAccountAddress]
@@ -131,7 +131,7 @@ export default function Bridge() {
         const { tokenTransfer } = await tokenBridge.deposit(amount, token);
         setLastTokenTransfer(tokenTransfer);
         tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
-        tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
+        tokenBridge.stream.subscribeToOperationTokenTransfers(tokenTransfer);
       }
       catch (error) {
         if (walletUtils.isUserAbortedWalletError(error))
@@ -163,7 +163,7 @@ export default function Bridge() {
         const { tokenTransfer } = await tokenBridge.startWithdraw(amount, token);
         setLastTokenTransfer(tokenTransfer);
         tokenTransfersStoreDispatch({ type: 'added', payload: tokenTransfer });
-        tokenBridge.stream.subscribeToTokenTransfer(tokenTransfer);
+        tokenBridge.stream.subscribeToOperationTokenTransfers(tokenTransfer);
       }
       catch (error) {
         if (walletUtils.isUserAbortedWalletError(error))

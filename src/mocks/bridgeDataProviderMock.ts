@@ -31,7 +31,7 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
 
   private tokenTransfersStore = new PersistentDataStore<BridgeTokenTransfer>(
     'mock.transfers',
-    tokenTransfer => bridgeUtils.getInitialOperationHash(tokenTransfer),
+    tokenTransfer => bridgeUtils.getInitialOperation(tokenTransfer).hash,
     (key, value) => {
       if (!key)
         return value;
@@ -69,17 +69,14 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
     }
   }
 
-  async getTokenTransfer(operationHash: string): Promise<BridgeTokenTransfer | null>;
-  async getTokenTransfer(tokenTransfer: BridgeTokenTransfer): Promise<BridgeTokenTransfer | null>;
-  async getTokenTransfer(operationHashOrTokenTransfer: string | BridgeTokenTransfer): Promise<BridgeTokenTransfer | null>;
-  async getTokenTransfer(operationHashOrTokenTransfer: string | BridgeTokenTransfer): Promise<BridgeTokenTransfer | null> {
-    const operationHash = typeof operationHashOrTokenTransfer === 'string'
-      ? operationHashOrTokenTransfer
-      : bridgeUtils.getInitialOperationHash(operationHashOrTokenTransfer);
+  async getTokenTransfer(tokenTransferId: string): Promise<BridgeTokenTransfer | null> {
+    const operationData = bridgeUtils.convertTokenTransferIdToOperationData(tokenTransferId);
+    if (!operationData)
+      return null;
 
     await wait(1000);
 
-    return this.tokenTransfersStore.get(operationHash) || null;
+    return this.tokenTransfersStore.get(operationData[0]) || null;
   }
 
   async getTokenTransfers(): Promise<BridgeTokenTransfer[]>;
@@ -102,16 +99,24 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
     return this.getTokenTransfersInternal(accountAddressOfAddresses, offset, limit);
   }
 
-  subscribeToTokenTransfer(operationHash: string): void;
-  subscribeToTokenTransfer(tokenTransfer: BridgeTokenTransfer): void;
-  subscribeToTokenTransfer(operationHashOrTokenTransfer: string | BridgeTokenTransfer): void;
-  subscribeToTokenTransfer(_operationHashOrTokenTransfer: unknown): void {
+  async getOperationTokenTransfers(operationHash: string): Promise<BridgeTokenTransfer[]>;
+  async getOperationTokenTransfers(tokenTransfer: BridgeTokenTransfer): Promise<BridgeTokenTransfer[]>;
+  async getOperationTokenTransfers(operationHashOrTokenTransfer: string | BridgeTokenTransfer): Promise<BridgeTokenTransfer[]>;
+  async getOperationTokenTransfers(operationHashOrTokenTransfer: string | BridgeTokenTransfer): Promise<BridgeTokenTransfer[]> {
+    const operationHash = typeof operationHashOrTokenTransfer === 'string'
+      ? operationHashOrTokenTransfer
+      : bridgeUtils.getInitialOperation(operationHashOrTokenTransfer).hash;
+
+    await wait(1000);
+    const operationTokenTransfer = this.tokenTransfersStore.get(operationHash);
+
+    return operationTokenTransfer ? [operationTokenTransfer] : [];
   }
 
-  unsubscribeFromTokenTransfer(operationHash: string): void;
-  unsubscribeFromTokenTransfer(tokenTransfer: BridgeTokenTransfer): void;
-  unsubscribeFromTokenTransfer(operationHashOrTokenTransfer: string | BridgeTokenTransfer): void;
-  unsubscribeFromTokenTransfer(_operationHashOrTokenTransfer: unknown): void {
+  subscribeToTokenTransfer(_tokenTransferId: string): void {
+  }
+
+  unsubscribeFromTokenTransfer(_tokenTransferId: string): void {
   }
 
   subscribeToTokenTransfers(): void {
@@ -130,6 +135,18 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
   unsubscribeFromAccountTokenTransfers(accountAddresses: readonly string[]): void;
   unsubscribeFromAccountTokenTransfers(accountAddressOrAddresses?: string | readonly string[] | undefined): void;
   unsubscribeFromAccountTokenTransfers(_accountAddressOrAddresses?: unknown): void {
+  }
+
+  subscribeToOperationTokenTransfers(operationHash: string): void;
+  subscribeToOperationTokenTransfers(tokenTransfer: BridgeTokenTransfer): void;
+  subscribeToOperationTokenTransfers(operationHashOrTokenTransfer: string | BridgeTokenTransfer): void;
+  subscribeToOperationTokenTransfers(_operationHashOrTokenTransfer: string | BridgeTokenTransfer): void {
+  }
+
+  unsubscribeFromOperationTokenTransfers(operationHash: string): void;
+  unsubscribeFromOperationTokenTransfers(tokenTransfer: BridgeTokenTransfer): void;
+  unsubscribeFromOperationTokenTransfers(operationHashOrTokenTransfer: string | BridgeTokenTransfer): void;
+  unsubscribeFromOperationTokenTransfers(_operationHashOrTokenTransfer: string | BridgeTokenTransfer): void {
   }
 
   unsubscribeFromAllSubscriptions(): void {
@@ -213,9 +230,10 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
       tezosOperation: {
         blockId: 0,
         hash: this.getTezosOperationHash(),
+        counter: this.getTezosOperationCounter(),
+        nonce: this.getTezosOperationNonce(),
         amount: sealedWithdrawal.etherlinkOperation.amount,
         token: tokenPair.tezos,
-        fee: 0n,
         timestamp: this.getOperationTimestamp()
       }
     });
@@ -224,13 +242,19 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
   private async runDepositCycle(pendingDeposit: PendingBridgeTokenDeposit) {
     await wait(10000);
 
+    const tezosOperationCounter = this.getTezosOperationCounter();
+    const tezosOperationNonce = this.getTezosOperationNonce();
+    const transferId = bridgeUtils.convertOperationDataToTokenTransferId(pendingDeposit.tezosOperation.hash, tezosOperationCounter, tezosOperationNonce);
+
     this.updateTokenTransfer({
       ...pendingDeposit,
+      id: transferId,
       status: BridgeTokenTransferStatus.Created,
       tezosOperation: {
         ...pendingDeposit.tezosOperation,
         blockId: 0,
-        fee: 0n
+        counter: tezosOperationCounter,
+        nonce: tezosOperationNonce
       }
     });
 
@@ -239,19 +263,21 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
     const tokenPair = (await this.tokensProvider.getRegisteredTokenPair(pendingDeposit.tezosOperation.token))!;
     this.updateTokenTransfer({
       ...pendingDeposit,
+      id: transferId,
       status: BridgeTokenTransferStatus.Finished,
       tezosOperation: {
         ...pendingDeposit.tezosOperation,
         blockId: 0,
-        fee: 0n
+        counter: tezosOperationCounter,
+        nonce: tezosOperationNonce
       },
       etherlinkOperation: {
         blockId: 0,
         hash: this.getEtherlinkOperationHash(),
         amount: pendingDeposit.tezosOperation.amount,
         token: tokenPair.etherlink,
-        fee: 0n,
-        timestamp: this.getOperationTimestamp()
+        timestamp: this.getOperationTimestamp(),
+        logIndex: this.getEtherlinkOperationLogIndex()
       }
     });
   }
@@ -259,6 +285,8 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
   private async runWithdrawalCycle(pendingWithdrawal: PendingBridgeTokenWithdrawal) {
     await wait(3000);
 
+    const logIndex = this.getEtherlinkOperationLogIndex();
+    const transferId = bridgeUtils.convertOperationDataToTokenTransferId(pendingWithdrawal.etherlinkOperation.hash, logIndex);
     const rollupData: FinishedBridgeTokenWithdrawal['rollupData'] = {
       outboxMessageLevel: 3006623,
       outboxMessageIndex: 0,
@@ -268,10 +296,11 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
     const etherlinkOperation: FinishedBridgeTokenWithdrawal['etherlinkOperation'] = {
       ...pendingWithdrawal.etherlinkOperation,
       blockId: 0,
-      fee: 0n
+      logIndex
     };
     this.updateTokenTransfer({
       ...pendingWithdrawal,
+      id: transferId,
       status: BridgeTokenTransferStatus.Created,
       etherlinkOperation,
       rollupData: {
@@ -283,6 +312,7 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
     await wait(5000);
     this.updateTokenTransfer({
       ...pendingWithdrawal,
+      id: transferId,
       status: BridgeTokenTransferStatus.Sealed,
       etherlinkOperation,
       rollupData
@@ -332,8 +362,22 @@ export class BridgeDataProviderMock implements TransfersBridgeDataProvider, Bala
     return b58cencode(this.generateBytesString(64), prefix.o);
   }
 
+  private getTezosOperationCounter() {
+    return Math.floor(Math.random() * 100_000) + 1;
+  }
+
+  private getTezosOperationNonce() {
+    const value = Math.floor(Math.random() * 100) + 1;
+
+    return value > 70 ? null : value;
+  }
+
   private getEtherlinkOperationHash() {
     return `0x${this.generateBytesString(64)}`;
+  }
+
+  private getEtherlinkOperationLogIndex() {
+    return Math.floor(Math.random() * 100) + 1;
   }
 
   private getOperationTimestamp() {

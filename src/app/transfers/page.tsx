@@ -35,8 +35,8 @@ export default function Transfers() {
 
   const handleTokenTransferCreated = useCallback(
     (tokenTransfer: BridgeTokenTransfer) => {
-      const initialOperationHash = bridgeUtils.getInitialOperationHash(tokenTransfer);
-      console.log('Token Transfer Created', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
+      const idOrInitialOperationHash = bridgeUtils.getTokenTransferIdOrInitialOperationHash(tokenTransfer);
+      console.log('Token Transfer Created', idOrInitialOperationHash, tokenTransfer.kind, tokenTransfer.status);
 
       dispatchToTokenTransfersStore({ type: 'added', payload: tokenTransfer });
       dispatchToLocalTokenTransfersStore({ type: 'deleted', payload: tokenTransfer });
@@ -46,8 +46,8 @@ export default function Transfers() {
 
   const handleTokenTransferUpdated = useCallback(
     (tokenTransfer: BridgeTokenTransfer) => {
-      const initialOperationHash = bridgeUtils.getInitialOperationHash(tokenTransfer);
-      console.log('Token Transfer Updated', initialOperationHash, tokenTransfer.kind, tokenTransfer.status);
+      const idOrInitialOperationHash = bridgeUtils.getTokenTransferIdOrInitialOperationHash(tokenTransfer);
+      console.log('Token Transfer Updated', idOrInitialOperationHash, tokenTransfer.kind, tokenTransfer.status);
 
       dispatchToTokenTransfersStore({ type: 'added-or-updated', payload: tokenTransfer });
       dispatchToLocalTokenTransfersStore({ type: 'deleted', payload: tokenTransfer });
@@ -87,6 +87,9 @@ export default function Transfers() {
         loadingState.current = TokenTransfersLoadingState.Loading;
         const tokenTransfers = await tokenBridge.data.getAccountTokenTransfers(accounts, { offset: offsetRef.current, limit: tokenTransfersLimit });
         dispatchToTokenTransfersStore({ type: 'loaded', payload: tokenTransfers });
+        for (const tokenTransfer of tokenTransfers) {
+          dispatchToLocalTokenTransfersStore({ type: 'deleted', payload: tokenTransfer });
+        }
         setIsTransfersLoading(false);
         loadingState.current = tokenTransfers.length ? TokenTransfersLoadingState.Ready : TokenTransfersLoadingState.AllTransfersLoaded;
       };
@@ -113,7 +116,11 @@ export default function Transfers() {
         typeof window !== 'undefined' && window.removeEventListener('scroll', handleScrollWindow);
       };
     },
-    [tokenBridge, tezosAccount, etherlinkAccount, handleTokenTransferCreated, handleTokenTransferUpdated, dispatchToTokenTransfersStore]
+    [
+      tokenBridge, tezosAccount, etherlinkAccount,
+      handleTokenTransferCreated, handleTokenTransferUpdated,
+      dispatchToTokenTransfersStore, dispatchToLocalTokenTransfersStore
+    ]
   );
 
   const handleFinishWithdrawing = useCallback(
@@ -130,7 +137,7 @@ export default function Transfers() {
   return <main className="flex flex-col items-center md:mt-6">
     <>
       {tokenTransfers.length
-        ? tokenTransfers.map(tokenTransfer => <BridgeTransfer key={bridgeUtils.getInitialOperationHash(tokenTransfer)}
+        ? tokenTransfers.map(tokenTransfer => <BridgeTransfer key={bridgeUtils.getTokenTransferIdOrInitialOperationHash(tokenTransfer)}
           bridgeTokenTransfer={tokenTransfer} onFinishWithdrawing={handleFinishWithdrawing}
         />)
         : !isTransfersLoading && <span>No transfers</span>

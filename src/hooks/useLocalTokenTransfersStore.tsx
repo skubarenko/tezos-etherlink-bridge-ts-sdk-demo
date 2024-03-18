@@ -14,33 +14,39 @@ type LocalTokenTransfersStore = {
 type LocalTokenTransfersStoreAction =
   | { type: 'added', payload: BridgeTokenTransfer }
   | { type: 'updated', payload: BridgeTokenTransfer }
-  | { type: 'deleted', payload: BridgeTokenTransfer | string };
+  | { type: 'deleted', payload: BridgeTokenTransfer };
 
 const localTokenTransfersReducer = (state: ReadonlyMap<string, BridgeTokenTransfer>, action: LocalTokenTransfersStoreAction): ReadonlyMap<string, BridgeTokenTransfer> => {
   switch (action.type) {
     case 'added': {
       const newState = new Map(state);
-      newState.set(bridgeUtils.getInitialOperationHash(action.payload), action.payload);
+      newState.set(bridgeUtils.getTokenTransferIdOrInitialOperationHash(action.payload), action.payload);
       return newState;
     }
     case 'updated': {
-      const initialOperationHash = bridgeUtils.getInitialOperationHash(action.payload);
-      if (!state.has(initialOperationHash))
+      const initialOperationHash = bridgeUtils.getInitialOperation(action.payload).hash;
+      const existsByInitialOperationHash = state.has(initialOperationHash);
+      const transferKey = bridgeUtils.getTokenTransferIdOrInitialOperationHash(action.payload);
+      if (!existsByInitialOperationHash && !state.has(transferKey))
         return state;
 
       const newState = new Map(state);
-      newState.set(initialOperationHash, action.payload);
+
+      if (existsByInitialOperationHash)
+        newState.delete(initialOperationHash);
+      newState.set(transferKey, action.payload);
+
       return newState;
     }
     case 'deleted': {
-      const initialOperationHash = typeof action.payload === 'string'
-        ? action.payload
-        : bridgeUtils.getInitialOperationHash(action.payload);
-      if (!state.has(initialOperationHash))
+      const initialOperationHash = bridgeUtils.getInitialOperation(action.payload).hash;
+      const transferKey = bridgeUtils.getTokenTransferIdOrInitialOperationHash(action.payload);
+      if (!state.has(initialOperationHash) && !state.has(transferKey))
         return state;
 
       const newState = new Map(state);
       newState.delete(initialOperationHash);
+      newState.delete(transferKey);
       return newState;
     }
   }

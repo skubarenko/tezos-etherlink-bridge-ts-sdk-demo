@@ -35,38 +35,58 @@ const tokenTransfersMapReducer = (
 
       for (const transfer of action.payload) {
         const initialOperation = bridgeUtils.getInitialOperation(transfer);
+        const transferKey = bridgeUtils.getTokenTransferIdOrInitialOperationHash(transfer);
         updateLastTokenTransferTimestampIfNeeded(initialOperation);
 
-        newState.set(initialOperation.hash, transfer);
+        if (newState.has(initialOperation.hash))
+          newState.delete(initialOperation.hash);
+        newState.set(transferKey, transfer);
       }
 
       return newState;
     }
     case 'added': {
       const initialOperation = bridgeUtils.getInitialOperation(action.payload);
+      const transferKey = bridgeUtils.getTokenTransferIdOrInitialOperationHash(action.payload);
       updateLastTokenTransferTimestampIfNeeded(initialOperation);
 
       const newState = new Map(state);
-      newState.set(initialOperation.hash, action.payload);
+
+      if (newState.has(initialOperation.hash))
+        newState.delete(initialOperation.hash);
+      newState.set(transferKey, action.payload);
+
       return newState;
     }
     case 'updated': {
-      const initialOperation = bridgeUtils.getInitialOperation(action.payload);
-      if (!state.has(initialOperation.hash))
+      const initialOperationHash = bridgeUtils.getInitialOperation(action.payload).hash;
+      const existsByInitialOperationHash = state.has(initialOperationHash);
+      const transferKey = bridgeUtils.getTokenTransferIdOrInitialOperationHash(action.payload);
+      if (!existsByInitialOperationHash && !state.has(transferKey))
         return state;
 
       const newState = new Map(state);
-      newState.set(initialOperation.hash, action.payload);
+
+      if (existsByInitialOperationHash)
+        newState.delete(initialOperationHash);
+      newState.set(transferKey, action.payload);
+
       return newState;
     }
     case 'added-or-updated': {
       const initialOperation = bridgeUtils.getInitialOperation(action.payload);
+      const existsByInitialOperationHash = state.has(initialOperation.hash);
+      const transferKey = bridgeUtils.getTokenTransferIdOrInitialOperationHash(action.payload);
       const isLastTokenTransfer = updateLastTokenTransferTimestampIfNeeded(initialOperation);
-      if (!isLastTokenTransfer && !state.has(initialOperation.hash))
+      if (!isLastTokenTransfer && !existsByInitialOperationHash && !state.has(transferKey))
         return state;
 
       const newState = new Map(state);
-      newState.set(initialOperation.hash, action.payload);
+
+      if (existsByInitialOperationHash)
+        newState.delete(initialOperation.hash);
+      newState.set(transferKey, action.payload);
+
       return newState;
     }
     case 'cleared': {

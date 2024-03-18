@@ -1,10 +1,8 @@
 import { NetworkType, ColorMode } from '@airgap/beacon-types';
 import {
   loggerProvider as sdkLoggerProvider, LogLevel,
-  createDefaultTokenBridge,
-  defaultEtherlinkKernelAddress, defaultWithdrawNativeTokenPrecompileAddress, defaultWithdrawNonNativeTokenPrecompileAddress,
-  LocalTokensBridgeDataProvider, TaquitoWalletTezosBridgeBlockchainService, Web3EtherlinkBridgeBlockchainService,
-  type TokenBridge,
+  TaquitoWalletTezosBridgeBlockchainService, Web3EtherlinkBridgeBlockchainService,
+  TokenBridge, DefaultDataProvider, LocalTokensBridgeDataProvider
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { TezosToolkit, Signer } from '@taquito/taquito';
@@ -73,30 +71,10 @@ export class App {
     this.tezosToolkit.setSignerProvider(this.tezosWalletSigner);
     this.beaconTezosWallet = this.beaconWallet.client;
 
+    sdkLoggerProvider.setLogLevel(LogLevel.Debug);
     this.tokenBridge = config.isMock
       ? this.createTokenBridgeMock()
-      : createDefaultTokenBridge({
-        tezos: {
-          name: 'taquito',
-          apiType: 'wallet',
-          tezosToolkit: this.tezosToolkit,
-          smartRollupAddress: config.bridge.smartRollupAddress,
-        },
-        etherlink: {
-          name: 'web3',
-          web3: this.etherlinkToolkit
-        },
-        tokenPairs,
-        dipDup: {
-          baseUrl: config.providers.dipDup.baseUrl,
-          webSocketApiBaseUrl: config.providers.dipDup.webSocketApiBaseUrl,
-        },
-        tzKTApiBaseUrl: config.providers.tzKT.baseUrl,
-        etherlinkRpcUrl: config.etherlink.network.rpcUrl,
-        logging: {
-          logLevel: LogLevel.Debug
-        }
-      });
+      : this.createTokenBridge();
 
     if (typeof window !== 'undefined') {
       (window as Window).sdkLoggerProvider = sdkLoggerProvider;
@@ -114,15 +92,39 @@ export class App {
         smartRollupAddress: config.bridge.smartRollupAddress
       }),
       etherlinkBridgeBlockchainService: new Web3EtherlinkBridgeBlockchainService({
-        web3: this.etherlinkToolkit,
-        kernelAddress: defaultEtherlinkKernelAddress,
-        withdrawNativeTokenPrecompileAddress: defaultWithdrawNativeTokenPrecompileAddress,
-        withdrawNonNativeTokenPrecompileAddress: defaultWithdrawNonNativeTokenPrecompileAddress
+        web3: this.etherlinkToolkit
       }),
       bridgeDataProviders: {
         tokens: tokensProvider,
         transfers: mockProvider,
         balances: mockProvider
+      }
+    });
+  }
+
+  private createTokenBridge() {
+    const defaultDataProvider = new DefaultDataProvider({
+      tokenPairs,
+      dipDup: {
+        baseUrl: config.providers.dipDup.baseUrl,
+        webSocketApiBaseUrl: config.providers.dipDup.webSocketApiBaseUrl,
+      },
+      tzKTApiBaseUrl: config.providers.tzKT.baseUrl,
+      etherlinkRpcUrl: config.etherlink.network.rpcUrl,
+    });
+
+    return new TokenBridge({
+      tezosBridgeBlockchainService: new TaquitoWalletTezosBridgeBlockchainService({
+        tezosToolkit: this.tezosToolkit,
+        smartRollupAddress: config.bridge.smartRollupAddress
+      }),
+      etherlinkBridgeBlockchainService: new Web3EtherlinkBridgeBlockchainService({
+        web3: this.etherlinkToolkit
+      }),
+      bridgeDataProviders: {
+        transfers: defaultDataProvider,
+        balances: defaultDataProvider,
+        tokens: defaultDataProvider,
       }
     });
   }
