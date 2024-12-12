@@ -1,8 +1,10 @@
 import type { ERC20EtherlinkToken, FA12TezosToken, FA2TezosToken, NativeEtherlinkToken, NativeTezosToken } from '@baking-bad/tezos-etherlink-bridge-sdk';
 
 import type { Token } from './models';
-import ctezLogo from '@/public/icons/tokens/ctez.png';
-import fxhashLogo from '@/public/icons/tokens/fxhash.png';
+import youLogo from '@/public/icons/tokens/you.png';
+import tzbtcLogo from '@/public/icons/tokens/tzbtc.png';
+import usdtLogo from '@/public/icons/tokens/usdt.png';
+import sirsLogo from '@/public/icons/tokens/sirs.png';
 import xtzLogo from '@/public/icons/tokens/xtz.png';
 
 export const tokenPairs = [
@@ -13,7 +15,7 @@ export const tokenPairs = [
       ticker: 'XTZ',
       decimals: 6,
       iconUrl: xtzLogo.src,
-      ticketHelperContractAddress: 'KT1DWVsu4Jtu2ficZ1qtNheGPunm5YVniegT',
+      ticketHelperContractAddress: 'KT1VEjeQfDBSfpDH5WeBM5LukHPGM2htYEh3',
     },
     etherlink: {
       type: 'native',
@@ -26,43 +28,84 @@ export const tokenPairs = [
   {
     tezos: {
       type: 'fa1.2',
-      name: 'Ctez',
-      ticker: 'CTEZ',
-      address: 'KT1LpdETWYvPWCQTR2FEW6jE6dVqJqxYjdeW',
-      decimals: 0,
-      iconUrl: ctezLogo.src,
-      ticketerContractAddress: 'KT1RvSp4yDKUABqWmv3pKGE9fA6iCGy7bqGh',
-      ticketHelperContractAddress: 'KT1DHLWJorW9WB6ztkx1XcoaJKWXeTu9yoR1'
+      name: 'tzBTC',
+      ticker: 'tzBTC',
+      address: 'KT1HmyazXfKDbo8XjwtWPXcoyHcmNPDCvZyb',
+      decimals: 8,
+      iconUrl: tzbtcLogo.src,
+      ticketerContractAddress: 'KT1H7if3gSZE1pZSK48W3NzGpKmbWyBxWDHe',
+      ticketHelperContractAddress: 'KT1KUAaaRMeMS5TJJyGTQJANcpSR4egvHBUk',
     },
     etherlink: {
       type: 'erc20',
-      name: 'Ctez',
-      ticker: 'CTEZ',
-      address: '0x87dcBf128677ba36E79D47dAf4eb4e51610e0150',
+      name: 'tzBTC',
+      ticker: 'tzBTC',
+      address: '0x8e73aE3CF688Fbd8368c99520d26F9eF1B4d3BCa',
+      decimals: 8,
+      iconUrl: tzbtcLogo.src,
+    },
+  },
+  {
+    tezos: {
+      type: 'fa1.2',
+      name: 'Sirius',
+      ticker: 'SIRS',
+      address: 'KT1TCTpXXbpnWBZ8whqExokbKfUrUW3nAXDJ',
       decimals: 0,
-      iconUrl: ctezLogo.src,
-    }
+      iconUrl: sirsLogo.src,
+      ticketerContractAddress: 'KT1Cw8WZLp4XUPLrDWUjwwpShzCRqzRByyVh',
+      ticketHelperContractAddress: 'KT1DSy9C2dBRDYPCHuBVaYYDQPjhprcSA9eL',
+    },
+    etherlink: {
+      type: 'erc20',
+      name: 'Sirius',
+      ticker: 'SIRS',
+      address: '0xbaA233e2f62f45e9D91Dacd3D6C6A57Bc2CBc575',
+      decimals: 0,
+      iconUrl: sirsLogo.src,
+    },
   },
   {
     tezos: {
       type: 'fa2',
-      name: 'fxhash, token: 42',
-      ticker: 'FXHASH_42',
-      address: 'KT195Eb8T524v5VJ99ZzH2wpnPfQ2wJfMi6h',
-      tokenId: '42',
-      decimals: 0,
-      iconUrl: fxhashLogo.src,
-      ticketerContractAddress: 'KT1VybveLaWhpQHKph28WcGwSy1ud22KSEan',
-      ticketHelperContractAddress: 'KT1DNtHLr9T9zksZjZvQwgtx5XJwrW9wzETB'
+      name: 'Tether USD',
+      ticker: 'USDt',
+      address: 'KT1V2ak1MfNd3w4oyKD64ehYU7K4CrpUcDGR',
+      tokenId: '0',
+      decimals: 6,
+      iconUrl: usdtLogo.src,
+      ticketerContractAddress: 'KT1S6Nf9MnafAgSUWLKcsySPNFLUxxqSkQCw',
+      ticketHelperContractAddress: 'KT1JLZe4qTa76y6Us2aDoRNUgZyssSDUr6F5',
     },
     etherlink: {
       type: 'erc20',
-      name: 'fxhash, token: 42',
-      ticker: 'FXHASH_42',
-      address: '0xcB5d40c6B1bdf5Cd51b3801351b0A68D101a561b',
-      decimals: 0,
-      iconUrl: fxhashLogo.src
-    }
+      name: 'Tether USD',
+      ticker: 'USDt',
+      address: '0xf68997eCC03751cb99B5B36712B213f11342452b',
+      decimals: 6,
+      iconUrl: usdtLogo.src,
+    },
+  },
+  {
+    tezos: {
+      type: 'fa2',
+      name: 'youves YOU Governance',
+      ticker: 'YOU',
+      address: 'KT1VyYTej9iHeAfpCKBEdpqiKaHAk4hUN7h8',
+      tokenId: '0',
+      decimals: 12,
+      iconUrl: youLogo.src,
+      ticketerContractAddress: 'KT1DjH84P98gKFptqiAevj1qoKqxrTaG1T7i',
+      ticketHelperContractAddress: 'KT1HV4o5WnnJ6QEPWqck9Lk3vQakcUD89qc8',
+    },
+    etherlink: {
+      type: 'erc20',
+      name: 'YOU',
+      ticker: 'YOU',
+      address: '0x59118D19848bAca5C3Dd1603acfC99C4cbcCC3db',
+      decimals: 12,
+      iconUrl: youLogo.src,
+    },
   }
 ] as const;
 

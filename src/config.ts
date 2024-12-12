@@ -1,5 +1,5 @@
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '');
-const tezosNetworkName = 'oxfordnet';
+const tezosNetworkName = 'ghostnet';
 
 export const config = {
   isTestnet: true,
@@ -10,8 +10,8 @@ export const config = {
     url: appUrl
   },
   bridge: {
-    smartRollupAddress: 'sr1T4XVcVtBRzYy52edVTdgup9Kip4Wrmn97',
-    smartRollupNodeBaseUrl: 'https://etherlink-rollup-oxford.dipdup.net'
+    smartRollupAddress: 'sr18wx6ezkeRjt1SZSeZ2UQzQN3Uc3YLMLqg',
+    smartRollupNodeBaseUrl: 'https://ghostnet-smart.tzkt.io/'
   },
   tezos: {
     network: {
@@ -24,20 +24,20 @@ export const config = {
     network: {
       name: 'Etherlink Testnet',
       displayName: 'Etherlink Testnet',
-      chainId: 1337, // '0x539',
+      chainId: 128123,
       nativeCurrency: {
         name: 'XTZ',
         symbol: 'XTZ',
         decimals: 18
       },
-      rpcUrl: 'https://etherlink.dipdup.net',
-      blockExplorerUrl: 'https://blockscout.dipdup.net'
+      rpcUrl: 'https://node.ghostnet.etherlink.com',
+      blockExplorerUrl: 'https://testnet.explorer.etherlink.com'
     },
   },
   providers: {
     dipDup: {
-      baseUrl: 'https://etherlink-bridge-indexer.dipdup.net',
-      webSocketApiBaseUrl: 'wss://etherlink-bridge-indexer.dipdup.net'
+      baseUrl: 'https://etherlink-ghostnet.dipdup.net',
+      webSocketApiBaseUrl: 'wss://etherlink-ghostnet.dipdup.net'
     },
     tzKT: {
       baseUrl: `https://api.${tezosNetworkName}.tzkt.io`,
