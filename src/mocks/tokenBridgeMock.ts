@@ -2,19 +2,19 @@
 import {
   TokenBridge,
   type TokenBridgeOptions, type TezosToken, type EtherlinkToken, type SealedBridgeTokenWithdrawal,
-  type TaquitoWalletTezosBridgeBlockchainService, type Web3EtherlinkBridgeBlockchainService,
+  type TaquitoWalletTezosBridgeBlockchainService, type EthersEtherlinkBridgeBlockchainService,
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
 
 import type { BridgeDataProviderMock } from './bridgeDataProviderMock';
 
-interface TokenBridgeMockOptions extends TokenBridgeOptions<TaquitoWalletTezosBridgeBlockchainService, Web3EtherlinkBridgeBlockchainService> {
+interface TokenBridgeMockOptions extends TokenBridgeOptions<TaquitoWalletTezosBridgeBlockchainService, EthersEtherlinkBridgeBlockchainService> {
   bridgeDataProviders: TokenBridgeOptions['bridgeDataProviders'] & {
     balances: BridgeDataProviderMock,
     transfers: BridgeDataProviderMock
   }
 }
 
-export class TokenBridgeMock extends TokenBridge<TaquitoWalletTezosBridgeBlockchainService, Web3EtherlinkBridgeBlockchainService> {
+export class TokenBridgeMock extends TokenBridge<TaquitoWalletTezosBridgeBlockchainService, EthersEtherlinkBridgeBlockchainService> {
   constructor(readonly options: TokenBridgeMockOptions) {
     super(options);
   }

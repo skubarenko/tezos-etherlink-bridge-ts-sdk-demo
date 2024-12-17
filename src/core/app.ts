@@ -1,14 +1,13 @@
 import { NetworkType, ColorMode } from '@airgap/beacon-types';
 import {
   loggerProvider as sdkLoggerProvider, LogLevel,
-  TaquitoWalletTezosBridgeBlockchainService, Web3EtherlinkBridgeBlockchainService,
+  TaquitoWalletTezosBridgeBlockchainService, EthersEtherlinkBridgeBlockchainService,
   TokenBridge, DefaultDataProvider, LocalTokensBridgeDataProvider
 } from '@baking-bad/tezos-etherlink-bridge-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { TezosToolkit, Signer } from '@taquito/taquito';
 import { createWeb3Modal, defaultConfig } from '@web3modal/ethers';
-import { EthersStoreUtil } from '@web3modal/scaffold-utils/ethers';
-import Web3 from 'web3';
+import { ethers } from 'ethers';
 
 import { TezosWalletSigner } from './wallets';
 import { config } from '@/config';
@@ -21,7 +20,7 @@ interface Window {
 }
 
 export class App {
-  readonly etherlinkToolkit: Web3;
+  readonly ethersService: EthersEtherlinkBridgeBlockchainService;
   readonly web3Modal: ReturnType<typeof createWeb3Modal>;
   readonly tezosToolkit: TezosToolkit;
   readonly beaconTezosWallet: BeaconWallet['client'];
@@ -31,7 +30,12 @@ export class App {
   private readonly tezosWalletSigner: Signer;
 
   constructor() {
-    this.etherlinkToolkit = new Web3(EthersStoreUtil.state.provider);
+    this.ethersService = new EthersEtherlinkBridgeBlockchainService({
+      // NOTE: the VoidSiger used as a filler before real signer assigned
+      //       consider to change this to something else:
+      signer: new ethers.VoidSigner(config.etherlink.network.rpcUrl),
+      ethers
+    });
     this.web3Modal = createWeb3Modal({
       ethersConfig: defaultConfig({
         metadata: {
@@ -91,9 +95,7 @@ export class App {
         tezosToolkit: this.tezosToolkit,
         smartRollupAddress: config.bridge.smartRollupAddress
       }),
-      etherlinkBridgeBlockchainService: new Web3EtherlinkBridgeBlockchainService({
-        web3: this.etherlinkToolkit
-      }),
+      etherlinkBridgeBlockchainService: this.ethersService,
       bridgeDataProviders: {
         tokens: tokensProvider,
         transfers: mockProvider,
@@ -118,9 +120,7 @@ export class App {
         tezosToolkit: this.tezosToolkit,
         smartRollupAddress: config.bridge.smartRollupAddress
       }),
-      etherlinkBridgeBlockchainService: new Web3EtherlinkBridgeBlockchainService({
-        web3: this.etherlinkToolkit
-      }),
+      etherlinkBridgeBlockchainService: this.ethersService,
       bridgeDataProviders: {
         transfers: defaultDataProvider,
         balances: defaultDataProvider,

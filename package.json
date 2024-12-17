@@ -17,11 +17,10 @@
     "@taquito/taquito": "^19.1.0",
     "@web3modal/ethers": "^4.0.5",
     "clsx": "^2.1.0",
-    "ethers": "^6.11.1",
+    "ethers": "^6.13.4",
     "next": "14.1.0",
     "react": "^18",
-    "react-dom": "^18",
-    "web3": "^4.4.0"
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@types/node": "^20",

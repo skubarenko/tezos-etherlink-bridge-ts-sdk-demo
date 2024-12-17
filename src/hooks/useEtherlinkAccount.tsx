@@ -2,6 +2,7 @@
 
 import { useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
 import { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
+import { ethers } from 'ethers';
 
 import { useAppContext } from './useAppContext';
 import { config } from '@/config';
@@ -73,12 +74,18 @@ export const EtherlinkAccountProvider = (props: { children: ReactNode }) => {
 
   useEffect(
     () => {
-      if (!appContext?.etherlinkToolkit)
+      if (!appContext?.ethersService)
         return;
 
-      appContext.etherlinkToolkit.setProvider(walletProvider);
+      if (!walletProvider)
+        return;
+
+      const provider = new ethers.BrowserProvider(walletProvider);
+      provider.getSigner().then((signer) => {
+        appContext.ethersService.setSigner(signer)
+      })
     },
-    [appContext?.etherlinkToolkit, walletProvider]
+    [appContext?.ethersService, walletProvider]
   );
 
   return <EtherlinkAccountContext.Provider value={currentValue}>
